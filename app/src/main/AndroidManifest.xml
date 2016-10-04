@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.simplicity.anuj.myday">
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <uses-feature
+        android:name="android.hardware.CAMERA"
+        android:required="true" />
+    <uses-feature android:name="android.hardware.location.gps" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <provider
+            android:name=".Data.generated.JournalContentProvider"
+            android:authorities="com.simplicity.anuj.myday"
+            android:exported="true" />
+
+            <!--<provider-->
+                <!--android:name="android.support.v4.content.FileProvider"-->
+                <!--android:authorities="com.simplicity.anuj.myday.fileprovider"-->
+                <!--android:exported="false"-->
+                <!--android:grantUriPermissions="true">-->
+                <!--<meta-data-->
+                    <!--android:name="android.support.FILE_PROVIDER_PATHS"-->
+                    <!--android:resource="@xml/file_paths"></meta-data>-->
+            <!--</provider>-->
+
+        <provider
+            android:name="com.commonsware.cwac.provider.StreamProvider"
+            android:authorities="com.simplicity.anuj.myday"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="com.commonsware.cwac.provider.STREAM_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"/>
+        </provider>
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".IntroActivityUtils.IntroActivity"
+            android:label="@string/title_activity_intro"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.simplicity.anuj.myday.MainActivity" />
+        </activity>
+        <activity
+            android:name=".AddEntryActivity"
+            android:label="@string/title_activity_add_entry"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.simplicity.anuj.myday.MainActivity" />
+        </activity>
+        <activity
+            android:name=".Activity.AboutMeActivity"
+            android:label="@string/title_activity_about_me"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.simplicity.anuj.myday.MainActivity" />
+        </activity>
+        <activity
+            android:name=".Activity.CalenderActivity"
+            android:label="@string/title_activity_calender"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.simplicity.anuj.myday.MainActivity" />
+        </activity>
+        <activity
+            android:name=".Activity.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.simplicity.anuj.myday.MainActivity" />
+        </activity>
+    </application>
+
+</manifest>
