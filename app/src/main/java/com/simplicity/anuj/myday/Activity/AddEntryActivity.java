@@ -1,5 +1,6 @@
-package com.simplicity.anuj.myday;
+package com.simplicity.anuj.myday.Activity;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +14,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -33,14 +33,19 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.simplicity.anuj.myday.Adapter.ImagesAdapter;
 import com.simplicity.anuj.myday.Data.JournalContentProvider;
-import com.simplicity.anuj.myday.Data.JournalContract;
+import com.simplicity.anuj.myday.MainActivity;
+import com.simplicity.anuj.myday.R;
+import com.simplicity.anuj.myday.Utils;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+
+import static android.support.v4.content.FileProvider.getUriForFile;
 
 public class AddEntryActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -49,7 +54,7 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
     private LocationRequest mLocationRequest;
 
     String mCurrentPhotoPath;
-    static final int REQUEST_TAKE_PHOTO = 1;
+    static final int REQUEST_TAKE_PHOTO = 1001;
 
 
     TextView CurrentDayTextView;
@@ -68,9 +73,12 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
     SimpleDateFormat mSimpleDateFormat;
 
     Context mContext;
+    ArrayList<String> mMediaArray;
 
     String day;
     String date;
+    String firstImage;
+    boolean hasFirstImage;
 
     double lt = -1;
     double ln = -1;
@@ -83,6 +91,9 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
         setSupportActionBar(toolbar);
 
         mContext = this;
+        firstImage = null;
+        hasFirstImage = false;
+        mMediaArray = new ArrayList<String>();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -117,10 +128,8 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
         AddImagefromCameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO CLick Photo Here
-
+                //Calling this funtion to handle the camera action
                 dispatchTakePictureIntent();
-
             }
 
 
@@ -150,6 +159,7 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                ContentValues mContentValues = new ContentValues();
                 int HOUR = mCalendar.get(Calendar.HOUR);
                 int MIN = mCalendar.get(Calendar.MINUTE);
                 int SEC = mCalendar.get(Calendar.SECOND);
@@ -165,35 +175,46 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
                 }
 
                 String time = String.valueOf(HOUR) + ":" + String.valueOf(MIN) + ":" + String.valueOf(SEC);
-                ContentValues mContentValues = new ContentValues();
-                mContentValues.put(JournalContract.DATE_CREATED, date);
-                mContentValues.put(JournalContract.TIME_CREATED, time);
-                mContentValues.put(JournalContract.DATE_MODIFIED, date);
-                mContentValues.put(JournalContract.TIME_MODIFIED, time);
+
+                mContentValues.put(Utils.DATE_CREATED_JOURNAL_, date);
+                mContentValues.put(Utils.TIME_CREATED_JOURNAL, time);
+                mContentValues.put(Utils.DATE_MODIFIED_JOURNAL, date);
+                mContentValues.put(Utils.TIME_MODIFIED_JOURNAL, time);
 
                 //Geo-Location Details in Database Entry
                 if (fetchedCo_ordinates) {
-                    mContentValues.put(JournalContract.LATITUDE, lt);
-                    mContentValues.put(JournalContract.LONGITUDE, ln);
+                    mContentValues.put(Utils.LATITUDE_JOURNAL, lt);
+                    mContentValues.put(Utils.LONGITUDE_JOURNAL, ln);
                 }
 
-                mContentValues.put(JournalContract.TITLE, TITLE);
+                mContentValues.put(Utils.TITLE_JOURNAL, TITLE);
                 String ENTRY = editTextAddEntry.getText().toString();
-                mContentValues.put(JournalContract.ENTRY, ENTRY);
+                mContentValues.put(Utils.ENTRY_JOURNAL, ENTRY);
 
-                //TODO USE IMAGES URI HERE INSTEAD OF NULL
-                mContentValues.put(JournalContract.IMAGE_PATH, "null");
-
+                if (hasFirstImage) {
+                    mContentValues.put(Utils.IMAGE_PATH_JOURNAL, firstImage);
+                } else {
+                    mContentValues.put(Utils.IMAGE_PATH_JOURNAL, "null");
+                }
                 //Only insert if entry is not empty
                 if (!ENTRY.matches("")) {
-                    getContentResolver().insert(JournalContentProvider.ContentProviderCreator.JOURNAL, mContentValues);
+                    ContentValues mMediaContentValues = new ContentValues();
+                    Uri result =getContentResolver().insert(JournalContentProvider.ContentProviderCreator.JOURNAL, mContentValues);
+                    long id = ContentUris.parseId(result);
+                    Log.e(LOG_TAG,"ADDED ENTRY IN ROW NO: "+id + "  " + mMediaArray.size() );
+                        for (String element:mMediaArray) {
+                            Log.e(LOG_TAG,"ADDING " + id + "   " + element);
+                            mMediaContentValues.put(Utils.ID_MAIN_MULTIMEDIA, id);
+                            mMediaContentValues.put(Utils.MEDIA_PATH_MULTIMEDIA, element);
+                        }
+                        getContentResolver().insert(JournalContentProvider.MultimediaContentProviderCreator.MULTIMEDIA,mMediaContentValues);
                     Toast.makeText(mContext, "Entry Added Successfully", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(mContext, "Some Error Occurred. Please Try Again.", Toast.LENGTH_LONG).show();
+                    Intent i = new Intent(mContext, MainActivity.class);
+                    startActivity(i);
+                } else
+                {
+                    Toast.makeText(mContext, "Can't save with no entry. Type something....", Toast.LENGTH_LONG).show();
                 }
-
-                Intent i = new Intent(mContext, MainActivity.class);
-                startActivity(i);
             }
         });
     }
@@ -201,22 +222,28 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
+        // Create the File where the photo should go
+        File photoFile = null;
+        Uri photoURI = null;
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
             try {
                 photoFile = createImageFile();
             } catch (IOException ex) {
                 // Error occurred while creating the File
-
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,
-                        "com.simplicity.anuj.myday.fileprovider",
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+
+                try {
+                    photoURI = getUriForFile(this, "com.random.simplicity.fileprovider", photoFile);
+                } catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG, "File Outside Path Provided Error");
+                    e.printStackTrace();
+                }
+                if (photoURI != null) {
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                }
             }
         }
     }
@@ -224,19 +251,35 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
+        String imageFileName = "MYDAY_" + timeStamp + "_";
+//        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File image = null;
+        try {image = File.createTempFile(
+                    imageFileName,  /* prefix */
+                    ".jpg",         /* suffix */
+                    storageDir      /* directory */
+            );
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Unable to create File");
+            e.printStackTrace();
+        } catch (SecurityException s) {
+            Log.e(LOG_TAG, "Unable to create File due to missing Permissions");
+            s.printStackTrace();
+        }
         // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
-        return image;
+        if (image != null) {
+            if (hasFirstImage==false) {
+                firstImage = "file:" + image.getAbsolutePath();
+                hasFirstImage = true;
+            }
+            mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+            return image;
+        }
+        return null;
     }
-        @Override
+
+    @Override
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
@@ -245,7 +288,7 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
     @Override
     protected void onStop() {
         super.onStop();
-        if (mGoogleApiClient.isConnected()){
+        if (mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
 
@@ -276,13 +319,11 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
                     new String[]{"android.permission.ACCESS_FINE_LOCATION",
                             "android.permission.ACCESS_COARSE_LOCATION"}, 1);
         }
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         try {
             LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        }
-        catch(SecurityException e)
-        {
-            Log.e(LOG_TAG,"Caught Security Exception while getting last location");
+        } catch (SecurityException e) {
+            Log.e(LOG_TAG, "Caught Security Exception while getting last location");
             e.printStackTrace();
         }
     }
@@ -292,29 +333,37 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-               Log.i(LOG_TAG,"PERMISSIONS GRANTED");
-            }
-            else
-            {
-                Log.e(LOG_TAG,"PERMISSIONS DENIED");
+                Log.i(LOG_TAG, "PERMISSIONS GRANTED");
+            } else {
+                Log.e(LOG_TAG, "PERMISSIONS DENIED");
             }
         }
     }
 
     @Override
-    public void onConnectionSuspended(int i) {}
+    public void onConnectionSuspended(int i) {
+    }
 
     @Override
     public void onLocationChanged(Location location) {
         lt = location.getLatitude();
-        ln=location.getLongitude();
-        String s="Latitude   " +Double.toString(lt) + "\n" + "Longitude  " +Double.toString(ln);
-        Log.e(LOG_TAG,"Detected Location"+s);
+        ln = location.getLongitude();
+        String s = "Latitude   " + Double.toString(lt) + "\n" + "Longitude  " + Double.toString(ln);
+        Log.d(LOG_TAG, "Detected Location" + s);
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e(LOG_TAG,"Connection to Location API Failed");
+        Log.e(LOG_TAG, "Connection to Location API Failed");
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(LOG_TAG,"onActivityResult Invoked");
+        if (requestCode==REQUEST_TAKE_PHOTO && resultCode==RESULT_OK){
+            mMediaArray.add(mCurrentPhotoPath);
+            Log.d(LOG_TAG,"ADDED TO mMediaArray"+mCurrentPhotoPath);
+        }
+    }
 }
