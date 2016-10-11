@@ -1,4 +1,4 @@
-package com.simplicity.anuj.myday;
+package com.simplicity.anuj.myday.Activity;
 
 import android.Manifest;
 import android.app.Activity;
@@ -29,12 +29,11 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.facebook.stetho.Stetho;
-import com.simplicity.anuj.myday.Activity.AboutMeActivity;
-import com.simplicity.anuj.myday.Activity.CalenderActivity;
-import com.simplicity.anuj.myday.Activity.SettingsActivity;
 import com.simplicity.anuj.myday.Adapter.JournalAdapter;
 import com.simplicity.anuj.myday.Data.JournalContentProvider;
 import com.simplicity.anuj.myday.IntroActivityUtils.IntroActivity;
+import com.simplicity.anuj.myday.R;
+import com.simplicity.anuj.myday.Utils;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, LoaderManager.LoaderCallbacks<Cursor> ,ActivityCompat.OnRequestPermissionsResultCallback{
@@ -69,8 +68,6 @@ public class MainActivity extends AppCompatActivity
         mContext = this;
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        mRecyclerView.setHasFixedSize(true);
-
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
@@ -138,12 +135,8 @@ public class MainActivity extends AppCompatActivity
                 ActivityCompat.requestPermissions((Activity) mContext,PermissionsList, PERMISSION_CODE);
             }
         });
-
         AskPermissions.start();
-
         getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-
-
     }
 
     @Override
