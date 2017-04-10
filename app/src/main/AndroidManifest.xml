@@ -10,14 +10,20 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <uses-feature
         android:name="android.hardware.CAMERA"
         android:required="true" />
     <uses-feature android:name="android.hardware.location.gps" />
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
+        android:backupAgent=".Backup.Agent"
+        android:fullBackupContent="@xml/journal_backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -25,34 +31,28 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-        <provider
-            android:name=".Data.generated.JournalContentProvider"
-            android:authorities="com.simplicity.anuj.myday"
-            android:exported="true" />
-
-            <!--<provider-->
-                <!--android:name="android.support.v4.content.FileProvider"-->
-                <!--android:authorities="com.simplicity.anuj.myday.fileprovider"-->
-                <!--android:exported="false"-->
-                <!--android:grantUriPermissions="true">-->
-                <!--<meta-data-->
-                    <!--android:name="android.support.FILE_PROVIDER_PATHS"-->
-                    <!--android:resource="@xml/file_paths"></meta-data>-->
-            <!--</provider>-->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBSiiqCAVwYchWncS2FVc6SnZBvg2imvyI" />
 
         <provider
-            android:name="com.commonsware.cwac.provider.StreamProvider"
-            android:authorities="com.simplicity.anuj.myday"
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.anuj.simplicity.myday.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
-                android:name="com.commonsware.cwac.provider.STREAM_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"/>
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
         </provider>
+        <provider
+            android:name=".Data.generated.JournalContentProvider"
+            android:authorities="com.simplicity.anuj.myday1"
+            android:exported="true" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".Activity.MainActivity"
             android:label="@string/app_name"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -63,47 +63,91 @@
         <activity
             android:name=".IntroActivityUtils.IntroActivity"
             android:label="@string/title_activity_intro"
-            android:parentActivityName=".MainActivity"
+            android:noHistory="true"
+            android:parentActivityName=".Activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.simplicity.anuj.myday.MainActivity" />
+                android:value=".Activity.MainActivity" />
         </activity>
         <activity
-            android:name=".AddEntryActivity"
+            android:name=".Activity.AddEntryActivity"
             android:label="@string/title_activity_add_entry"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".Activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden">
+            android:windowSoftInputMode="adjustPan|stateHidden">
+
+            <!-- android:windowSoftInputMode="stateHidden" -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.simplicity.anuj.myday.MainActivity" />
+                android:value=".Activity.MainActivity" />
         </activity>
         <activity
             android:name=".Activity.AboutMeActivity"
             android:label="@string/title_activity_about_me"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".Activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.simplicity.anuj.myday.MainActivity" />
+                android:value=".Activity.MainActivity" />
         </activity>
         <activity
             android:name=".Activity.CalenderActivity"
             android:label="@string/title_activity_calender"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".Activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.simplicity.anuj.myday.MainActivity" />
+                android:value=".Activity.MainActivity" />
         </activity>
         <activity
-            android:name=".Activity.SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity">
+            android:name=".Activity.ViewActivity"
+            android:label="@string/title_activity_view_activity2"
+            android:parentActivityName=".Activity.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.simplicity.anuj.myday.MainActivity" />
+                android:value="com.simplicity.anuj.myday.Activity.MainActivity" />
+        </activity>
+
+        <receiver android:name=".Widget.MyDayAppWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/my_day_app_widget_info" />
+        </receiver>
+
+        <activity
+            android:name=".Activity.CameraActivity"
+            android:label="@string/title_activity_camera"
+            android:parentActivityName=".Activity.AddEntryActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.simplicity.anuj.myday.Activity.AddEntryActivity" />
+        </activity>
+        <activity android:name=".Activity.ViewWeatherActivity" />
+        <activity
+            android:name=".Activity.FullscreenImageViewActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_fullscreen_image_view"
+            android:parentActivityName=".Activity.MainActivity"
+            android:theme="@style/FullscreenTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.simplicity.anuj.myday.Activity.MainActivity" />
+        </activity>
+        <activity
+            android:name=".Activity.Settings"
+            android:label="Settings"
+            android:parentActivityName=".Activity.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".Activity.MainActivity" />
         </activity>
     </application>
 

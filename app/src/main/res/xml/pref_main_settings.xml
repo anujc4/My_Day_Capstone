@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="User Details">
+        <EditTextPreference
+            android:dialogTitle="Name"
+            android:key="preference_edit_name_of_user"
+            android:summary="Enter your name to help me identify you."
+            android:title="Name" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Notifications">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="preference_send_notification"
+            android:summaryOff="Do not send any notifications"
+            android:summaryOn="Send me daily notification"
+            android:title="Send Notifications" />
+        <Preference
+            android:enabled="false"
+            android:key="preference_choose_time_notifications"
+            android:title="Choose Time" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="About">
+        <Preference android:title="About">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetClass="com.simplicity.anuj.myday.Activity.AboutMeActivity" />
+        </Preference>
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -15,6 +15,12 @@ public interface JournalContract {
     @AutoIncrement
     String _ID = "_id";
 
+    @DataType(DataType.Type.TEXT)
+    String TITLE = "title";
+
+    @DataType(DataType.Type.TEXT)
+    String ENTRY = "entry";
+
     @DataType(DataType.Type.TEXT)@NotNull
     String DATE_CREATED = "date_created";
 
@@ -27,23 +33,17 @@ public interface JournalContract {
     @DataType(DataType.Type.TEXT)@NotNull
     String TIME_MODIFIED = "time_modified";
 
-    @DataType(DataType.Type.REAL)
-    @DefaultValue("null")
-    String LATITUDE = "latitude";
+    @DataType(DataType.Type.INTEGER)
+    @NotNull
+    @DefaultValue("-1")
+    String HAS_LOCATION = "has_location";
 
-    @DataType(DataType.Type.REAL)
-    @DefaultValue("null")
-    String LONGITUDE = "longitude";
-
-    @DataType(DataType.Type.TEXT)
-    String TITLE = "title";
-
-    @DataType(DataType.Type.TEXT)
-            @NotNull
-    String ENTRY = "entry";
+    @DataType(DataType.Type.INTEGER)
+    @NotNull
+    @DefaultValue("-1")
+    String HAS_WEATHER = "has_weather";
 
     @DataType(DataType.Type.TEXT)
     @DefaultValue("null")
-    String IMAGE_PATH = "imagepath";
-
+    String IMAGE_PATH = "thumb_path";
 }

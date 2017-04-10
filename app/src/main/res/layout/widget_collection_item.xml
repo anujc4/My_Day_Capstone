@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="4dp"
+    android:paddingEnd="16dp"
+    android:paddingStart="16dp"
+    android:paddingTop="4dp">
+
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widget_list_day_of_month"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="20"
+            android:textSize="30sp" />
+
+        <TextView
+            android:id="@+id/widget_list_rest_of_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="November" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/widget_list_journal_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/linearLayout"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/widget_list_journal_entry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/linearLayout"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/widget_list_journal_title"
+        android:layout_toEndOf="@+id/linearLayout"
+        android:text="TextView" />
+
+</RelativeLayout>

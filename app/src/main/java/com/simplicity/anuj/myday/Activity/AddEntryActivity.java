@@ -1,87 +1,87 @@
 package com.simplicity.anuj.myday.Activity;
 
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.simplicity.anuj.myday.Adapter.ImagesAdapter;
-import com.simplicity.anuj.myday.Data.JournalContentProvider;
-import com.simplicity.anuj.myday.MainActivity;
+import com.simplicity.anuj.myday.Adapter.CameraPicsAdapter;
+import com.simplicity.anuj.myday.LocationService.LocationFetcher;
 import com.simplicity.anuj.myday.R;
-import com.simplicity.anuj.myday.Utils;
+import com.simplicity.anuj.myday.Utility.CommitDatabase;
+import com.simplicity.anuj.myday.Utility.DateFormatter;
+import com.simplicity.anuj.myday.Utility.Utils;
+import com.simplicity.anuj.myday.Weather.GetWeatherResponse;
+import com.simplicity.anuj.myday.Weather.Main;
+import com.simplicity.anuj.myday.Weather.Weather;
+import com.simplicity.anuj.myday.Weather.WeatherProvider;
+import com.simplicity.anuj.myday.Weather.Wind;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static android.support.v4.content.FileProvider.getUriForFile;
+import static android.view.View.GONE;
 
-public class AddEntryActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class AddEntryActivity extends AppCompatActivity {
 
-    private final String LOG_TAG = AddEntryActivity.class.getCanonicalName();
-    private GoogleApiClient mGoogleApiClient;
-    private LocationRequest mLocationRequest;
-
-    String mCurrentPhotoPath;
     static final int REQUEST_TAKE_PHOTO = 1001;
-
-
+    private static boolean recordLocation;
+    //Hold the Attributes to be entered in the Journal Database
+    final ContentValues mWeatherContentValues = new ContentValues();
+    final ContentValues mLocationContentValues = new ContentValues();
+    final ContentValues mJournalContentValues = new ContentValues();
+    final ContentValues mMediaContentValues = new ContentValues();
+    private final String LOG_TAG = AddEntryActivity.class.getCanonicalName();
+    DateFormatter mDateFormatter;
+    String mCurrentPhotoPath;
     TextView CurrentDayTextView;
     TextView CurrentDateTextView;
     TextView HintTextView;
     EditText editTextAddEntry;
     EditText editTitleAddEntry;
     ImageButton AddImagefromCameraButton;
-    ImageButton AddTextFromVoiceButton;
-    LinearLayout linearLayout;
-    ListView CameraListView;
-    ImagesAdapter mImagesAdapter;
+    ImageButton GeotagButton;
+    ImageButton AddVideoFromCameraButton;
+    ImageButton WeatherButton;
+    FrameLayout mFrameLayout;
 
-    Calendar mCalendar;
-    Date mDate;
-    SimpleDateFormat mSimpleDateFormat;
+    RecyclerView mRecyclerView;
+    CameraPicsAdapter mCameraPicsAdapter;
+
+    LocationFetcher mLocationFetcher;
 
     Context mContext;
-    ArrayList<String> mMediaArray;
-
-    String day;
-    String date;
+    ArrayList<String> mImageArray;
+    ArrayList<String> mVideoArray;
     String firstImage;
-    boolean hasFirstImage;
-
-    double lt = -1;
-    double ln = -1;
+    boolean hasThumbImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,10 +90,15 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
         mContext = this;
         firstImage = null;
-        hasFirstImage = false;
-        mMediaArray = new ArrayList<String>();
+        hasThumbImage = false;
+        mImageArray = new ArrayList<>();
+        mVideoArray = new ArrayList<>();
+        recordLocation = true;
+
+        mLocationFetcher = new LocationFetcher(mContext);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -102,130 +107,194 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
         HintTextView = (TextView) findViewById(R.id.HintTextView);
         editTextAddEntry = (EditText) findViewById(R.id.editText);
         editTitleAddEntry = (EditText) findViewById(R.id.TitleEditText);
-        AddImagefromCameraButton = (ImageButton) findViewById(R.id.imageButton);
-        AddTextFromVoiceButton = (ImageButton) findViewById(R.id.imageButton2);
-        linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
-        CameraListView = (ListView) findViewById(R.id.ImagesListView);
+        AddImagefromCameraButton = (ImageButton) findViewById(R.id.add_image_from_camera);
+        AddVideoFromCameraButton = (ImageButton) findViewById(R.id.add_video_from_camera);
+        WeatherButton = (ImageButton) findViewById(R.id.view_weather_data);
+        GeotagButton = (ImageButton) findViewById(R.id.switch_geo_location_button);
+        mFrameLayout = (FrameLayout) findViewById(R.id.frame_layout_view_location_map);
+        mFrameLayout.setVisibility(GONE);
+        mRecyclerView = (RecyclerView) findViewById(R.id.add_entry_images_recycler_view);
+        mRecyclerView.setVisibility(GONE);
+        mCameraPicsAdapter = new CameraPicsAdapter(mImageArray, mContext);
+        LinearLayoutManager manager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
+        mRecyclerView.setLayoutManager(manager);
+        mRecyclerView.setAdapter(mCameraPicsAdapter);
 
-        //Implementing the ListView for Camera Shots
-        mImagesAdapter = new ImagesAdapter(mContext, R.layout.images_for_list_view);
-        CameraListView.setAdapter(mImagesAdapter);
 
-        //Initially remove the linear layout as there are no images
-        linearLayout.setVisibility(View.GONE);
+        mDateFormatter = new DateFormatter();
 
-        //Initiating the Location API
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(LocationServices.API)
-                    .addOnConnectionFailedListener(this)
-                    .addConnectionCallbacks(this)
-                    .build();
+        Intent intent = getIntent();
+        if (intent.hasExtra("path")) {
+            restoreState();
         }
 
-
-        //Call the function to capture Images
         AddImagefromCameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Calling this funtion to handle the camera action
+                mRecyclerView.setVisibility(View.VISIBLE);
                 dispatchTakePictureIntent();
             }
-
-
         });
 
-        editTextAddEntry.setHint("Enter Here...");
+        AddVideoFromCameraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mContext, CameraActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        WeatherButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        GeotagButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (recordLocation) {
+                    recordLocation = false;
+                    GeotagButton.setBackgroundResource(R.drawable.ic_geotag_disable);
+                } else {
+                    recordLocation = true;
+                    GeotagButton.setBackgroundResource(R.drawable.ic_action_name);
+                }
+            }
+        });
+
+        editTextAddEntry.setHint("ENTRY");
         editTextAddEntry.setGravity(Gravity.TOP);
         editTitleAddEntry.setHint("TITLE");
 
-        //GET TIME AND DATE DETAILS
-        mCalendar = Calendar.getInstance(TimeZone.getDefault());
-        mDate = mCalendar.getTime();
-        mSimpleDateFormat = new SimpleDateFormat("EEEE");
-        day = mSimpleDateFormat.format(mDate);
+        CurrentDateTextView.setText(mDateFormatter.getDate());
+        CurrentDayTextView.setText(mDateFormatter.getDay());
 
-        date = String.valueOf(mCalendar.get(Calendar.DATE))
-                + "/" +
-                String.valueOf(mCalendar.get(Calendar.MONTH) + 1)
-                + "/" +
-                String.valueOf(mCalendar.get(Calendar.YEAR));
+        Call<GetWeatherResponse> call = WeatherProvider.getWeatherAPI()
+                .getWeather(String.valueOf(mLocationFetcher.fetchLatitude()), String.valueOf(mLocationFetcher.fetchLongitude()), Utils.API_KEY);
 
-        CurrentDateTextView.setText(date);
-        CurrentDayTextView.setText(day);
+        call.enqueue(new Callback<GetWeatherResponse>() {
+            @Override
+            public void onResponse(Call<GetWeatherResponse> call, Response<GetWeatherResponse> response) {
+                List<Weather> tempWeather = response.body().getWeather();
+                Main tempMain = response.body().getMain();
+                Wind tempWind = response.body().getWind();
+
+                mWeatherContentValues.put(Utils.WEATHER_MAIN_WEATHER, tempWeather.get(0).getMain());
+                mWeatherContentValues.put(Utils.WEATHER_DESCRIPTION_WEATHER, tempWeather.get(0).getDescription());
+                mWeatherContentValues.put(Utils.MAIN_TEMP_WEATHER, String.valueOf(tempMain.getTemp()));
+                mWeatherContentValues.put(Utils.MAIN_PRESSURE_WEATHER, String.valueOf(tempMain.getPressure()));
+                mWeatherContentValues.put(Utils.MAIN_HUMIDITY_WEATHER, String.valueOf(tempMain.getHumidity()));
+                mWeatherContentValues.put(Utils.MAIN_TEMP_MIN_WEATHER, String.valueOf(tempMain.getTempMin()));
+                mWeatherContentValues.put(Utils.MAIN_TEMP_MAX_WEATHER, String.valueOf(tempMain.getTempMax()));
+                mWeatherContentValues.put(Utils.CLOUDS_WEATHER, String.valueOf(tempWind.getSpeed()));
+                mWeatherContentValues.put(Utils.NAME_WEATHER, response.body().getName());
+            }
+
+            @Override
+            public void onFailure(Call<GetWeatherResponse> call, Throwable t) {
+                mJournalContentValues.put(Utils.HAS_WEATHER_JOURNAL, -1);
+            }
+        });
 
         //Going to add entry into database now
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabInsertEntry);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ContentValues mContentValues = new ContentValues();
-                int HOUR = mCalendar.get(Calendar.HOUR);
-                int MIN = mCalendar.get(Calendar.MINUTE);
-                int SEC = mCalendar.get(Calendar.SECOND);
-                boolean fetchedCo_ordinates = false;
-                String TITLE = editTitleAddEntry.getText().toString();
-                Log.e(LOG_TAG, TITLE);
-                if (TITLE.matches("")) {
-                    TITLE = "Journal Entry";
-                }
-
-                if (lt != -1 && ln != -1) {
-                    fetchedCo_ordinates = true;
-                }
-
-                String time = String.valueOf(HOUR) + ":" + String.valueOf(MIN) + ":" + String.valueOf(SEC);
-
-                mContentValues.put(Utils.DATE_CREATED_JOURNAL_, date);
-                mContentValues.put(Utils.TIME_CREATED_JOURNAL, time);
-                mContentValues.put(Utils.DATE_MODIFIED_JOURNAL, date);
-                mContentValues.put(Utils.TIME_MODIFIED_JOURNAL, time);
-
-                //Geo-Location Details in Database Entry
-                if (fetchedCo_ordinates) {
-                    mContentValues.put(Utils.LATITUDE_JOURNAL, lt);
-                    mContentValues.put(Utils.LONGITUDE_JOURNAL, ln);
-                }
-
-                mContentValues.put(Utils.TITLE_JOURNAL, TITLE);
-                String ENTRY = editTextAddEntry.getText().toString();
-                mContentValues.put(Utils.ENTRY_JOURNAL, ENTRY);
-
-                if (hasFirstImage) {
-                    mContentValues.put(Utils.IMAGE_PATH_JOURNAL, firstImage);
-                } else {
-                    mContentValues.put(Utils.IMAGE_PATH_JOURNAL, "null");
-                }
-                //Only insert if entry is not empty
-                if (!ENTRY.matches("")) {
-                    ContentValues mMediaContentValues = new ContentValues();
-                    Uri result =getContentResolver().insert(JournalContentProvider.ContentProviderCreator.JOURNAL, mContentValues);
-                    long id = ContentUris.parseId(result);
-                    Log.e(LOG_TAG,"ADDED ENTRY IN ROW NO: "+id + "  " + mMediaArray.size() );
-                        for (String element:mMediaArray) {
-                            Log.e(LOG_TAG,"ADDING " + id + "   " + element);
-                            mMediaContentValues.put(Utils.ID_MAIN_MULTIMEDIA, id);
-                            mMediaContentValues.put(Utils.MEDIA_PATH_MULTIMEDIA, element);
-                        }
-                        getContentResolver().insert(JournalContentProvider.MultimediaContentProviderCreator.MULTIMEDIA,mMediaContentValues);
-                    Toast.makeText(mContext, "Entry Added Successfully", Toast.LENGTH_SHORT).show();
-                    Intent i = new Intent(mContext, MainActivity.class);
-                    startActivity(i);
-                } else
-                {
-                    Toast.makeText(mContext, "Can't save with no entry. Type something....", Toast.LENGTH_LONG).show();
-                }
+                addEntry();
             }
         });
     }
 
+
+    private void restoreState() {
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("editTitleAddEntry", editTitleAddEntry.getText().toString());
+        outState.putString("editTextAddEntry", editTextAddEntry.getText().toString());
+        outState.putBoolean("recordLocation", recordLocation);
+        outState.putStringArrayList("mImageArray", mImageArray);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        editTitleAddEntry.setText(savedInstanceState.getString("editTitleAddEntry"));
+        editTextAddEntry.setText(savedInstanceState.getString("editTextAddEntry"));
+        recordLocation = savedInstanceState.getBoolean("recordLocation");
+        mImageArray = savedInstanceState.getStringArrayList("mImageArray");
+    }
+
+    @Override
+    public void onBackPressed() {
+        addEntry();
+        super.onBackPressed();
+    }
+
+    private void addEntry() {
+
+        //Content Values for Journal Table
+        String TITLE = editTitleAddEntry.getText().toString();
+        if (TITLE.isEmpty()) {
+            TITLE = "Journal Entry";
+        }
+        mJournalContentValues.put(Utils.TITLE_JOURNAL, TITLE);
+
+        String ENTRY = editTextAddEntry.getText().toString();
+        mJournalContentValues.put(Utils.ENTRY_JOURNAL, ENTRY);
+
+        String time = mDateFormatter.getTime();
+        String date = mDateFormatter.getDate();
+
+        mJournalContentValues.put(Utils.DATE_CREATED_JOURNAL, date);
+        mJournalContentValues.put(Utils.TIME_CREATED_JOURNAL, time);
+        mJournalContentValues.put(Utils.DATE_MODIFIED_JOURNAL, date);
+        mJournalContentValues.put(Utils.TIME_MODIFIED_JOURNAL, time);
+
+        //Geo-Location Details in Database Entry
+        if (mLocationFetcher.GPSGenerated && recordLocation) {
+            mJournalContentValues.put(Utils.HAS_LOCATION_JOURNAL, 1);
+            mLocationContentValues.put(Utils.LATITUDE_LOCATION, mLocationFetcher.fetchLatitude());
+            mLocationContentValues.put(Utils.LONGITUDE_LOCATION, mLocationFetcher.fetchLongitude());
+        } else
+            mJournalContentValues.put(Utils.HAS_LOCATION_JOURNAL, -1);
+
+        if (hasThumbImage)
+            mJournalContentValues.put(Utils.THUMB_PATH_JOURNAL, firstImage);
+        else
+            mJournalContentValues.put(Utils.THUMB_PATH_JOURNAL, "null");
+
+
+        if (!mImageArray.isEmpty()) {
+            for (String element : mImageArray)
+                mMediaContentValues.put(Utils.IMAGE_PATH_MULTIMEDIA, element);
+        }
+
+        //Call the Async Task to commit to database
+        new CommitDatabase(mContext).execute(mJournalContentValues, mLocationContentValues, mMediaContentValues, mWeatherContentValues);
+
+        Toast.makeText(mContext, "Entry Added Successfully", Toast.LENGTH_SHORT).show();
+        Intent i = new Intent(mContext, MainActivity.class);
+        startActivity(i);
+    }
+
+
     private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        Intent takeMediaIntent = null;
+        takeMediaIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
         // Ensure that there's a camera activity to handle the intent
         // Create the File where the photo should go
         File photoFile = null;
         Uri photoURI = null;
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+        if (takeMediaIntent.resolveActivity(getPackageManager()) != null) {
             try {
                 photoFile = createImageFile();
             } catch (IOException ex) {
@@ -235,14 +304,14 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
             if (photoFile != null) {
 
                 try {
-                    photoURI = getUriForFile(this, "com.random.simplicity.fileprovider", photoFile);
+                    photoURI = getUriForFile(this, "com.anuj.simplicity.myday.fileprovider", photoFile);
                 } catch (IllegalArgumentException e) {
                     Log.e(LOG_TAG, "File Outside Path Provided Error");
                     e.printStackTrace();
                 }
                 if (photoURI != null) {
-                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                    takeMediaIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                    startActivityForResult(takeMediaIntent, REQUEST_TAKE_PHOTO);
                 }
             }
         }
@@ -252,10 +321,11 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "MYDAY_" + timeStamp + "_";
-//        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File storageDir = null;
         File image = null;
-        try {image = File.createTempFile(
+        try {
+            storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            image = File.createTempFile(
                     imageFileName,  /* prefix */
                     ".jpg",         /* suffix */
                     storageDir      /* directory */
@@ -269,11 +339,12 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
         }
         // Save a file: path for use with ACTION_VIEW intents
         if (image != null) {
-            if (hasFirstImage==false) {
-                firstImage = "file:" + image.getAbsolutePath();
-                hasFirstImage = true;
+            if (!hasThumbImage) {
+                firstImage = image.getAbsolutePath();
+                Log.e(LOG_TAG, firstImage);
+                hasThumbImage = true;
             }
-            mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+            mCurrentPhotoPath = image.getAbsolutePath();
             return image;
         }
         return null;
@@ -282,50 +353,25 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
+        mLocationFetcher.onStartInvoked();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
-
+        mLocationFetcher.onStopInvoked();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mGoogleApiClient.disconnect();
+        mLocationFetcher.onPauseInvoked();
     }
-
 
     @Override
     protected void onResume() {
         super.onResume();
-        mGoogleApiClient.connect();
-
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        mLocationRequest = LocationRequest.create();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            //Requesting Permissions Again
-            ActivityCompat.requestPermissions(this,
-                    new String[]{"android.permission.ACCESS_FINE_LOCATION",
-                            "android.permission.ACCESS_COARSE_LOCATION"}, 1);
-        }
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        try {
-            LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        } catch (SecurityException e) {
-            Log.e(LOG_TAG, "Caught Security Exception while getting last location");
-            e.printStackTrace();
-        }
+        mLocationFetcher.onResumeInvoked();
     }
 
     @Override
@@ -336,34 +382,18 @@ public class AddEntryActivity extends AppCompatActivity implements GoogleApiClie
                 Log.i(LOG_TAG, "PERMISSIONS GRANTED");
             } else {
                 Log.e(LOG_TAG, "PERMISSIONS DENIED");
+                Toast.makeText(mContext, "Sorry. You must give permission to use this feature. Please try again.", Toast.LENGTH_LONG).show();
             }
         }
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        lt = location.getLatitude();
-        ln = location.getLongitude();
-        String s = "Latitude   " + Double.toString(lt) + "\n" + "Longitude  " + Double.toString(ln);
-        Log.d(LOG_TAG, "Detected Location" + s);
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e(LOG_TAG, "Connection to Location API Failed");
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d(LOG_TAG,"onActivityResult Invoked");
-        if (requestCode==REQUEST_TAKE_PHOTO && resultCode==RESULT_OK){
-            mMediaArray.add(mCurrentPhotoPath);
-            Log.d(LOG_TAG,"ADDED TO mMediaArray"+mCurrentPhotoPath);
+        Log.d(LOG_TAG, "onActivityResult Invoked");
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+            mImageArray.add(mCurrentPhotoPath);
+            Log.e(LOG_TAG, "ADDED TO mImageArray" + mCurrentPhotoPath);
         }
     }
 }

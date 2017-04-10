@@ -18,7 +18,7 @@
     </string>
 
     <string name="pref_title_display_name">Display name</string>
-    <string name="pref_default_display_name">John Smith</string>
+    <string name="pref_default_display_name">Name</string>
 
     <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
     <string-array name="pref_example_list_titles">
@@ -68,10 +68,53 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_add_entry">AddEntryActivity</string>
-    <string name="enter_your_thoughts_below">Enter your thoughts below...</string>
+    <string name="title_activity_add_entry">Add New Entry</string>
+    <string name="enter_your_thoughts_below">What are you thinking about?</string>
     <string name="button_delete">DELETE</string>
     <string name="button_share">SHARE</string>
-    <string name="title_activity_about_me">AboutMeActivity</string>
-    <string name="title_activity_calender">CalenderActivity</string>
+    <string name="title_activity_about_me">About Me</string>
+    <string name="title_activity_calender">Calender</string>
+    <string name="FileProviderAuthority">com.simplicity.anuj.myday.fileprovider</string>
+    <string name="title_activity_view_entry">Journal Entry</string>
+    <string name="enter_here">Enter Here</string>
+    <string name="title">Title</string>
+    <string name="record_video">Record Video</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="turn_geotag_on_off">Turn GeoTag On/Off</string>
+    <string name="title_activity_view_activity2">Day Entry</string>
+    <string name="nothing_found">Nothing Found</string>
+
+    <string-array name="list_preference_entries">
+        <item>Entry 1</item>
+        <item>Entry 2</item>
+        <item>Entry 3</item>
+    </string-array>
+
+    <string-array name="list_preference_entry_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="multi_select_list_preference_default_value" />
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
+    <string name="title_activity_camera">CameraActivity</string>
+    <string name="record">Record</string>
+    <string name="description_info">Info</string>
+    <string name="intro_message">Hit to Record Video</string>
+    <string name="permission_request">Request</string>
+    <string name="camera_error">ERROR</string>
+    <string name="stop">STOP</string>
+    <string name="recoed_video">Recoed Video</string>
+    <string name="cancel">Cancel</string>
+    <string name="weather_data">Weather Data</string>
+    <string name="ErrorMessageRetrofit">Failed to feth Weather Data. Please check your network settings and try again.</string>
+
+    <string name="title_activity_fullscreen_image_view">FullscreenImageViewActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="delete_image">Delete Image?</string>
+    <string name="yes">Yes</string>
+    <string name="no_delete">No</string>
 </resources>
