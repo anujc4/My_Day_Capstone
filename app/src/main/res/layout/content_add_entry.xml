@@ -184,4 +184,28 @@
 
         </RelativeLayout>
     </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/frame_layout_view_weather_data"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="4dp"
+        android:visibility="gone"
+        android:background="#FFFFFF"
+        android:orientation="vertical">
+
+        <ImageButton
+            android:id="@+id/close_weather"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_marginEnd="@dimen/close_button_margin"
+            android:layout_marginTop="@dimen/close_button_margin"
+            android:background="@drawable/ic_cancel_black_24dp"
+            android:contentDescription="@string/cancel"
+            android:elevation="8dp"
+            android:padding="@dimen/cancel_button_padding" />
+
+    </FrameLayout>
+
 </FrameLayout>

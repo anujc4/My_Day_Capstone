@@ -1,5 +1,6 @@
 package com.simplicity.anuj.myday.LocationService;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -26,8 +27,8 @@ public class LocationFetcher implements LocationInterface, OnConnectionFailedLis
     public boolean GPSGenerated = false;
     private GoogleApiClient mGoogleApiClient;
     private Context mContext;
-    private double lt = -1;
-    private double ln = -1;
+    private static double lt = -1;
+    private static double ln = -1;
 
     public LocationFetcher(Context c) {
         this.mContext = c;
@@ -58,15 +59,17 @@ public class LocationFetcher implements LocationInterface, OnConnectionFailedLis
                             "android.permission.ACCESS_COARSE_LOCATION"}, 1);
             return;
         }
+        //This is for latest location coordinates
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-//        try {
-//            LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-////            Log.e(LOG_TAG, "Connected");
-//
-//
-//        } catch (SecurityException e) {
-//            e.printStackTrace();
-//        }
+
+        //For the time being that LocationRequest tries to get the latest location coordinates
+        //set the lt and ln values to the last known location
+        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if (mLastLocation != null) {
+            lt = mLastLocation.getLatitude();
+            ln = mLastLocation.getLongitude();
+        }
     }
 
     @Override

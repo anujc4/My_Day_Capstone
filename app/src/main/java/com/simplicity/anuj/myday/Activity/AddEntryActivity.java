@@ -2,21 +2,26 @@ package com.simplicity.anuj.myday.Activity;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -29,11 +34,13 @@ import com.simplicity.anuj.myday.R;
 import com.simplicity.anuj.myday.Utility.CommitDatabase;
 import com.simplicity.anuj.myday.Utility.DateFormatter;
 import com.simplicity.anuj.myday.Utility.Utils;
+import com.simplicity.anuj.myday.Weather.FetchWeatherData;
 import com.simplicity.anuj.myday.Weather.GetWeatherResponse;
 import com.simplicity.anuj.myday.Weather.Main;
 import com.simplicity.anuj.myday.Weather.Weather;
-import com.simplicity.anuj.myday.Weather.WeatherProvider;
+import com.simplicity.anuj.myday.Weather.WeatherCallback;
 import com.simplicity.anuj.myday.Weather.Wind;
+import com.simplicity.anuj.myday.Weather.WeatherMainFragment;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,23 +49,21 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.support.v4.content.FileProvider.getUriForFile;
 import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
-public class AddEntryActivity extends AppCompatActivity {
+public class AddEntryActivity extends AppCompatActivity implements WeatherCallback {
 
     static final int REQUEST_TAKE_PHOTO = 1001;
     private static boolean recordLocation;
-    //Hold the Attributes to be entered in the Journal Database
     final ContentValues mWeatherContentValues = new ContentValues();
     final ContentValues mLocationContentValues = new ContentValues();
     final ContentValues mJournalContentValues = new ContentValues();
     final ContentValues mMediaContentValues = new ContentValues();
-    private final String LOG_TAG = AddEntryActivity.class.getCanonicalName();
+    private final String LOG_TAG = AddEntryActivity.class.getSimpleName();
     DateFormatter mDateFormatter;
     String mCurrentPhotoPath;
     TextView CurrentDayTextView;
@@ -71,11 +76,16 @@ public class AddEntryActivity extends AppCompatActivity {
     ImageButton AddVideoFromCameraButton;
     ImageButton WeatherButton;
     FrameLayout mFrameLayout;
+    FrameLayout mFrameLayoutWeather;
+    static Boolean isWeatherFragmentShown;
+    WeatherMainFragment viewWeatherData;
 
     RecyclerView mRecyclerView;
     CameraPicsAdapter mCameraPicsAdapter;
 
     LocationFetcher mLocationFetcher;
+    static Response<GetWeatherResponse> response;
+    FetchWeatherData fetchWeatherData;
 
     Context mContext;
     ArrayList<String> mImageArray;
@@ -98,6 +108,7 @@ public class AddEntryActivity extends AppCompatActivity {
         mVideoArray = new ArrayList<>();
         recordLocation = true;
 
+        isWeatherFragmentShown = false;
         mLocationFetcher = new LocationFetcher(mContext);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -120,18 +131,24 @@ public class AddEntryActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setAdapter(mCameraPicsAdapter);
 
+        mFrameLayoutWeather = (FrameLayout) findViewById(R.id.frame_layout_view_weather_data);
+        viewWeatherData = new WeatherMainFragment();
+
 
         mDateFormatter = new DateFormatter();
+        Log.e(LOG_TAG, String.valueOf(mLocationFetcher.fetchLatitude()));
+
+        fetchWeatherData = new FetchWeatherData(mLocationFetcher, this);
 
         Intent intent = getIntent();
         if (intent.hasExtra("path")) {
-            restoreState();
+            //TODO Restore State Here
         }
 
         AddImagefromCameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mRecyclerView.setVisibility(View.VISIBLE);
+                mRecyclerView.setVisibility(VISIBLE);
                 dispatchTakePictureIntent();
             }
         });
@@ -144,9 +161,82 @@ public class AddEntryActivity extends AppCompatActivity {
             }
         });
 
+        //Set the Frame Layout to center of the Screen
+        DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+
+        int top = (int) ((displayMetrics.heightPixels / displayMetrics.density) / 10);
+        int sides = (int) ((displayMetrics.widthPixels / displayMetrics.density) / 10);
+        int bottom = (int) ((displayMetrics.heightPixels / displayMetrics.density) / 5);
+        FrameLayout.LayoutParams tempParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        tempParams.setMargins(sides, top, sides, bottom);
+        mFrameLayoutWeather.setLayoutParams(tempParams);
+
         WeatherButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mFrameLayoutWeather.getVisibility() == GONE) {
+                    //If Fragment is not Visible, make it visible and Add the Fragmenr to View
+                    final Bundle weatherBundle = new Bundle();
+                    if (response != null) {
+                        new AsyncTask<Void, Void, Void>() {
+                            @Override
+                            protected Void doInBackground(Void... params) {
+                                List<Weather> tempWeather = response.body().getWeather();
+                                Main tempMain = response.body().getMain();
+                                Wind tempWind = response.body().getWind();
+                                weatherBundle.putInt(Utils.WEATHER_CONDITION_ID, tempWeather.get(0).getId());
+                                weatherBundle.putString(Utils.WEATHER_MAIN_WEATHER, tempWeather.get(0).getMain());
+                                weatherBundle.putString(Utils.WEATHER_DESCRIPTION_WEATHER, tempWeather.get(0).getDescription());
+                                weatherBundle.putString(Utils.MAIN_TEMP_WEATHER, String.valueOf(tempMain.getTemp()));
+                                weatherBundle.putString(Utils.MAIN_PRESSURE_WEATHER, String.valueOf(tempMain.getPressure()));
+                                weatherBundle.putString(Utils.MAIN_HUMIDITY_WEATHER, String.valueOf(tempMain.getHumidity()));
+                                weatherBundle.putString(Utils.MAIN_TEMP_MIN_WEATHER, String.valueOf(tempMain.getTempMin()));
+                                weatherBundle.putString(Utils.MAIN_TEMP_MAX_WEATHER, String.valueOf(tempMain.getTempMax()));
+                                weatherBundle.putString(Utils.CLOUDS_WEATHER, String.valueOf(tempWind.getSpeed()));
+                                weatherBundle.putString(Utils.NAME_WEATHER, response.body().getName());
+                                Log.e(LOG_TAG, weatherBundle.toString());
+                                return null;
+                            }
+
+                            @Override
+                            protected void onPostExecute(Void aVoid) {
+                                super.onPostExecute(aVoid);
+                                isWeatherFragmentShown = true;
+                                if (!viewWeatherData.isVisible()) {
+                                    viewWeatherData.setArguments(weatherBundle);
+                                    mFrameLayoutWeather.setVisibility(VISIBLE);
+                                    getFragmentManager().beginTransaction()
+                                            .add(R.id.frame_layout_view_weather_data, viewWeatherData)
+                                            .commit();
+                                } else {
+                                    mFrameLayoutWeather.setVisibility(GONE);
+                                    getFragmentManager().beginTransaction()
+                                            .remove(viewWeatherData)
+                                            .commit();
+                                }
+
+                            }
+                        }.execute();
+                    } else {
+//                        Log.e(LOG_TAG, "ERROR : RESPONSE IS NULL");
+                        //Show an Alert Dialog
+                        new AlertDialog.Builder(mContext)
+                                .setTitle("Error")
+                                .setMessage("Unable to fetch Weather Data at the Moment. Please check your Internet Connection and try again.")
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                    }
+                                })
+                                .show();
+                    }
+
+                } else {
+                    isWeatherFragmentShown = false;
+                    mFrameLayoutWeather.setVisibility(GONE);
+
+                }
 
             }
         });
@@ -172,32 +262,6 @@ public class AddEntryActivity extends AppCompatActivity {
         CurrentDateTextView.setText(mDateFormatter.getDate());
         CurrentDayTextView.setText(mDateFormatter.getDay());
 
-        Call<GetWeatherResponse> call = WeatherProvider.getWeatherAPI()
-                .getWeather(String.valueOf(mLocationFetcher.fetchLatitude()), String.valueOf(mLocationFetcher.fetchLongitude()), Utils.API_KEY);
-
-        call.enqueue(new Callback<GetWeatherResponse>() {
-            @Override
-            public void onResponse(Call<GetWeatherResponse> call, Response<GetWeatherResponse> response) {
-                List<Weather> tempWeather = response.body().getWeather();
-                Main tempMain = response.body().getMain();
-                Wind tempWind = response.body().getWind();
-
-                mWeatherContentValues.put(Utils.WEATHER_MAIN_WEATHER, tempWeather.get(0).getMain());
-                mWeatherContentValues.put(Utils.WEATHER_DESCRIPTION_WEATHER, tempWeather.get(0).getDescription());
-                mWeatherContentValues.put(Utils.MAIN_TEMP_WEATHER, String.valueOf(tempMain.getTemp()));
-                mWeatherContentValues.put(Utils.MAIN_PRESSURE_WEATHER, String.valueOf(tempMain.getPressure()));
-                mWeatherContentValues.put(Utils.MAIN_HUMIDITY_WEATHER, String.valueOf(tempMain.getHumidity()));
-                mWeatherContentValues.put(Utils.MAIN_TEMP_MIN_WEATHER, String.valueOf(tempMain.getTempMin()));
-                mWeatherContentValues.put(Utils.MAIN_TEMP_MAX_WEATHER, String.valueOf(tempMain.getTempMax()));
-                mWeatherContentValues.put(Utils.CLOUDS_WEATHER, String.valueOf(tempWind.getSpeed()));
-                mWeatherContentValues.put(Utils.NAME_WEATHER, response.body().getName());
-            }
-
-            @Override
-            public void onFailure(Call<GetWeatherResponse> call, Throwable t) {
-                mJournalContentValues.put(Utils.HAS_WEATHER_JOURNAL, -1);
-            }
-        });
 
         //Going to add entry into database now
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabInsertEntry);
@@ -207,10 +271,6 @@ public class AddEntryActivity extends AppCompatActivity {
                 addEntry();
             }
         });
-    }
-
-
-    private void restoreState() {
     }
 
     @Override
@@ -233,6 +293,14 @@ public class AddEntryActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if (isWeatherFragmentShown) {
+            mFrameLayoutWeather.setVisibility(GONE);
+            getFragmentManager().beginTransaction()
+                    .remove(viewWeatherData)
+                    .commit();
+            isWeatherFragmentShown = false;
+            return;
+        }
         addEntry();
         super.onBackPressed();
     }
@@ -276,6 +344,25 @@ public class AddEntryActivity extends AppCompatActivity {
                 mMediaContentValues.put(Utils.IMAGE_PATH_MULTIMEDIA, element);
         }
 
+
+        //Fetch Weather Data and Inset it into Content Values
+        if (response != null) {
+            List<Weather> tempWeather = response.body().getWeather();
+            Main tempMain = response.body().getMain();
+            Wind tempWind = response.body().getWind();
+            mWeatherContentValues.put(Utils.WEATHER_CONDITION_ID, tempWeather.get(0).getId());
+            mWeatherContentValues.put(Utils.WEATHER_MAIN_WEATHER, tempWeather.get(0).getMain());
+            mWeatherContentValues.put(Utils.WEATHER_DESCRIPTION_WEATHER, tempWeather.get(0).getDescription());
+            mWeatherContentValues.put(Utils.MAIN_TEMP_WEATHER, String.valueOf(tempMain.getTemp()));
+            mWeatherContentValues.put(Utils.MAIN_PRESSURE_WEATHER, String.valueOf(tempMain.getPressure()));
+            mWeatherContentValues.put(Utils.MAIN_HUMIDITY_WEATHER, String.valueOf(tempMain.getHumidity()));
+            mWeatherContentValues.put(Utils.MAIN_TEMP_MIN_WEATHER, String.valueOf(tempMain.getTempMin()));
+            mWeatherContentValues.put(Utils.MAIN_TEMP_MAX_WEATHER, String.valueOf(tempMain.getTempMax()));
+            mWeatherContentValues.put(Utils.CLOUDS_WEATHER, String.valueOf(tempWind.getSpeed()));
+            mWeatherContentValues.put(Utils.NAME_WEATHER, response.body().getName());
+            Log.d(LOG_TAG, mWeatherContentValues.toString());
+
+        }
         //Call the Async Task to commit to database
         new CommitDatabase(mContext).execute(mJournalContentValues, mLocationContentValues, mMediaContentValues, mWeatherContentValues);
 
@@ -395,5 +482,17 @@ public class AddEntryActivity extends AppCompatActivity {
             mImageArray.add(mCurrentPhotoPath);
             Log.e(LOG_TAG, "ADDED TO mImageArray" + mCurrentPhotoPath);
         }
+    }
+
+    @Override
+    public void onEventCompleted() {
+        response = fetchWeatherData.fetchAPI();
+        Log.e(LOG_TAG, "SUCCESS");
+        Log.e(LOG_TAG, response.toString());
+    }
+
+    @Override
+    public void onEventFailed() {
+
     }
 }

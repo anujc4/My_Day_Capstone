@@ -19,6 +19,9 @@ public interface WeatherContract {
     @References(table = JournalDatabaseCreator.Tables.JOURNAL, column = JournalContract._ID)
     String _ID_MAIN = "_id_main";
 
+    @DataType(DataType.Type.INTEGER)
+    String WEATHER_CONDITION_ID = "weather_condition_id";
+
     @DataType(DataType.Type.TEXT)
     String WEATHER_MAIN = "weather_main";
 

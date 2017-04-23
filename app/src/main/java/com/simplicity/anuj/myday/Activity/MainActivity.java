@@ -245,7 +245,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
 
         } else if (id == R.id.nav_settings) {
-            intent = new Intent(this, SettingsActivity.class);
+            intent = new Intent(this, Settings.class);
             startActivity(intent);
 
         } else if (id == R.id.nav_share) {

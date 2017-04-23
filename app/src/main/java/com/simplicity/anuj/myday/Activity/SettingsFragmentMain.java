@@ -1,5 +1,6 @@
 package com.simplicity.anuj.myday.Activity;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
@@ -27,6 +28,16 @@ public class SettingsFragmentMain extends PreferenceFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //TODO Call an Async Task and Load the Preferences beforehand
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                //TODO Call Shared Preferences Here
+                return null;
+            }
+        }.execute();
+
         addPreferencesFromResource(R.xml.pref_main_settings);
 
         mEditNamePreference = (EditTextPreference) getPreferenceManager().findPreference(PREFERENCE_EDIT_NAME_OF_USER);

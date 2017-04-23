@@ -33,7 +33,7 @@
             android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBSiiqCAVwYchWncS2FVc6SnZBvg2imvyI" />
+            android:value="AIzaSyBfsX239Q42v4jbDOBwQDo_OL0P_DFzxfk" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"

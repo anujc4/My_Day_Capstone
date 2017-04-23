@@ -15,7 +15,7 @@ import net.simonvt.schematic.annotation.Table;
  */
 @Database(version = JournalDatabaseCreator.VERSION)
 public class JournalDatabaseCreator {
-    static final int VERSION = 5;
+    static final int VERSION = 6;
     @Table(MultimediaContract.class)
     static final String MULTIMEDIA = "multimedia";
     @Table(LocationContract.class)

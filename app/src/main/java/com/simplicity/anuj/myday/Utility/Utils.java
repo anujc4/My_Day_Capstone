@@ -17,27 +17,31 @@ public class Utils {
     public static final int HAS_LOCAION_INDEX = 7;
     public static final int HAS_WEATHER_INDEX = 8;
     public static final int THUMB_PATH_INDEX = 9;
+
     public static final int _ID_MULTIMEDIA_INDEX = 0;
     public static final int _ID_MAIN_INDEX = 1;
     public static final int IMAGE_PATH_INDEX = 2;
     public static final int VIDEO_PATH_INDEX = 3;
     public static final int AUDIO_PATH_INDEX = 4;
+
     public static final int _ID_LOCATION_INDEX = 0;
     public static final int _ID_MAIN_LOCATION_INDEX = 1;
     public static final int LATITUDE_INDEX = 2;
     public static final int LONGITUDE_INDEX = 3;
     public static final int _ID_WEATHER_INDEX = 1;
     public static final int _ID_MAIN_WEATHER_INDEX = 2;
-    public static final int WEATHER_MAIN_INDEX = 3;
-    public static final int WEATHER_DESCRIPTION_INDEX = 4;
-    public static final int MAIN_TEMP_INDEX = 5;
-    public static final int MAIN_TEMP_MIN_INDEX = 6;
-    public static final int MAIN_TEMP_MAX_INDEX = 7;
-    public static final int MAIN_HUMIDITY_INDEX = 8;
-    public static final int MAIN_PRESSURE_INDEX = 9;
-    public static final int WIND_SPEED_INDEX = 10;
-    public static final int CLOUDS_INDEX = 11;
-    public static final int NAME_INDEX = 12;
+    public static final int WEATHER_CONDITION_INDEX = 3;
+    public static final int WEATHER_MAIN_INDEX = 4;
+    public static final int WEATHER_DESCRIPTION_INDEX = 5;
+    public static final int MAIN_TEMP_INDEX = 6;
+    public static final int MAIN_TEMP_MIN_INDEX = 7;
+    public static final int MAIN_TEMP_MAX_INDEX = 8;
+    public static final int MAIN_HUMIDITY_INDEX = 9;
+    public static final int MAIN_PRESSURE_INDEX = 10;
+    public static final int WIND_SPEED_INDEX = 11;
+    public static final int CLOUDS_INDEX = 12;
+    public static final int NAME_INDEX = 13;
+
     public static final String _ID_JOURNAL = "_id";
     public static final String TITLE_JOURNAL = "title";
     public static final String ENTRY_JOURNAL = "entry";
@@ -59,6 +63,7 @@ public class Utils {
     public static final String LONGITUDE_LOCATION = "longitude";
     public static final String _ID_WEATHER = "_id";
     public static final String _ID_MAIN_WEATHER = "_id_main";
+    public static final String WEATHER_CONDITION_ID = "weather_condition_id";
     public static final String WEATHER_MAIN_WEATHER = "weather_main";
     public static final String WEATHER_DESCRIPTION_WEATHER = "weather_description";
     public static final String MAIN_TEMP_WEATHER = "main_temp";
