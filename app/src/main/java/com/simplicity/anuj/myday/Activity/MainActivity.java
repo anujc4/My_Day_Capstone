@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.multidex.MultiDex;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -32,11 +33,13 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
 
-import com.facebook.stetho.Stetho;
+//import com.facebook.stetho.Stetho;
 import com.simplicity.anuj.myday.Adapter.JournalAdapter;
 import com.simplicity.anuj.myday.Data.JournalContentProvider;
+import com.simplicity.anuj.myday.Identity.SignInActivity;
 import com.simplicity.anuj.myday.IntroActivityUtils.IntroActivity;
 import com.simplicity.anuj.myday.R;
+import com.simplicity.anuj.myday.Settings.Settings;
 import com.simplicity.anuj.myday.Utility.ItemClickListener;
 import com.simplicity.anuj.myday.Utility.Utils;
 
@@ -70,7 +73,8 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Stetho.initializeWithDefaults(this);
+//        Stetho.initializeWithDefaults(this);
+        MultiDex.install(this);
 
         mContext = this;
 
@@ -250,6 +254,8 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_share) {
             //TODO Send the Link to APP from here
+            intent = new Intent(this, SignInActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_help) {
             intent = new Intent(this,IntroActivity.class);
             startActivity(intent);

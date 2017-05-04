@@ -1,4 +1,4 @@
-package com.simplicity.anuj.myday.Activity;
+package com.simplicity.anuj.myday.Settings;
 
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;

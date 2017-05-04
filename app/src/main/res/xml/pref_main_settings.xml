@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <PreferenceCategory android:title="User Details">
         <EditTextPreference
             android:dialogTitle="Name"
@@ -7,16 +10,16 @@
             android:summary="Enter your name to help me identify you."
             android:title="Name" />
     </PreferenceCategory>
+
     <PreferenceCategory android:title="Notifications">
         <SwitchPreference
             android:defaultValue="false"
             android:key="preference_send_notification"
             android:summaryOff="Do not send any notifications"
-            android:summaryOn="Send me daily notification"
+            android:summaryOn="Send me daily notifications"
             android:title="Send Notifications" />
         <Preference
-            android:enabled="false"
-            android:key="preference_choose_time_notifications"
+            android:key="preference_time_notification"
             android:title="Choose Time" />
     </PreferenceCategory>
 

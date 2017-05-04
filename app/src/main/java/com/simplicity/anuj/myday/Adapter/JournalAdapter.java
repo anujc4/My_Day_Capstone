@@ -90,6 +90,7 @@ public class JournalAdapter extends RecyclerViewCursorAdapter<JournalAdapter.Jou
                 @Override
                 public void onClick(View view) {
                     Log.d(LOG_TAG, "Delete Button Click Registered");
+
                     Thread t = new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -123,7 +124,7 @@ public class JournalAdapter extends RecyclerViewCursorAdapter<JournalAdapter.Jou
                 }
             });
 
-            cardTimeStampTextView.setText(cursor.getString(Utils.DATE_CREATED_INDEX) + "  at " + cursor.getString(Utils.TIME_CREATED_INDEX).substring(0, 4));
+            cardTimeStampTextView.setText(cursor.getString(Utils.DATE_CREATED_INDEX) + "  at " + cursor.getString(Utils.TIME_CREATED_INDEX).substring(0, 6));
             titleTextView.setTextColor(mContext.getResources().getColor(R.color.Black));
             titleTextView.setText(cursor.getString(Utils.TITLE_INDEX));
             String description = cursor.getString(Utils.ENTRY_INDEX);
@@ -154,3 +155,41 @@ public class JournalAdapter extends RecyclerViewCursorAdapter<JournalAdapter.Jou
         }
     }
 }
+
+//public class JournalAdapter extends RecyclerViewCursorAdapter<JournalAdapter.MyViewHolder>{
+//
+//    /**
+//     * Constructor.
+//     *
+//     * @param context The Context the Adapter is displayed in.
+//     */
+//    protected JournalAdapter(Context context) {
+//        super(context);
+//    }
+//
+//    @Override
+//    public JournalAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+//        return null;
+//    }
+//
+//    @Override
+//    public void onBindViewHolder(JournalAdapter.MyViewHolder holder, int position) {
+//
+//    }
+//
+//    public class MyViewHolder extends RecyclerViewCursorViewHolder {
+//        /**
+//         * Constructor.
+//         *
+//         * @param view The root view of the ViewHolder.
+//         */
+//        public MyViewHolder(View view) {
+//            super(view);
+//        }
+//
+//        @Override
+//        public void bindCursor(Cursor cursor) {
+//
+//        }
+//    }
+//}

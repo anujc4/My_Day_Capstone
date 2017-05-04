@@ -12,6 +12,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -111,7 +112,9 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
         isWeatherFragmentShown = false;
         mLocationFetcher = new LocationFetcher(mContext);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar bar = getSupportActionBar();
+        if (bar != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         CurrentDayTextView = (TextView) findViewById(R.id.CurrentDayTextView);
         CurrentDateTextView = (TextView) findViewById(R.id.CurrentTimeTextView);

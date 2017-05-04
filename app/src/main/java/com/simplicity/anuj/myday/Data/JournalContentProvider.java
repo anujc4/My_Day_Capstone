@@ -12,7 +12,8 @@ import net.simonvt.schematic.annotation.TableEndpoint;
 @ContentProvider(authority = JournalContentProvider.AUTHORITY, database = JournalDatabaseCreator.class)
 public final class JournalContentProvider {
 
-    public static final String AUTHORITY = "com.simplicity.anuj.myday1";
+
+    static final String AUTHORITY = "com.simplicity.anuj.myday1";
 
     JournalContentProvider() {
     }

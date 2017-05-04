@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
 
     <uses-feature
         android:name="android.hardware.CAMERA"
@@ -142,13 +142,15 @@
                 android:value="com.simplicity.anuj.myday.Activity.MainActivity" />
         </activity>
         <activity
-            android:name=".Activity.Settings"
+            android:name=".Settings.Settings"
             android:label="Settings"
             android:parentActivityName=".Activity.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activity.MainActivity" />
         </activity>
+        <activity android:name=".Identity.SignInActivity" />
+        <activity android:name=".Identity.FirebaseSignInActivity"></activity>
     </application>
 
 </manifest>

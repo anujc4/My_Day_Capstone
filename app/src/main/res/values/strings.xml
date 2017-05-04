@@ -12,6 +12,9 @@
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>
 
+    <!-- String with Google Client ID-->
+    <string name="server_client_id">773178421521-3jpm3fc16mpp8g1ia05ik7n5icb65bih.apps.googleusercontent.com</string>
+
     <string name="pref_title_social_recommendations">Enable social recommendations</string>
     <string name="pref_description_social_recommendations">Recommendations for people to contact
         based on your message history
@@ -117,4 +120,5 @@
     <string name="delete_image">Delete Image?</string>
     <string name="yes">Yes</string>
     <string name="no_delete">No</string>
+    <string name="loading">Please Wait...</string>
 </resources>
