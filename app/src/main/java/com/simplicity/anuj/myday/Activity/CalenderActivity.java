@@ -3,6 +3,7 @@ package com.simplicity.anuj.myday.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -39,7 +40,8 @@ public class CalenderActivity extends AppCompatActivity {
         setContentView(R.layout.activity_calender);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mContext = this;
         mDateFormatter = new DateFormatter();
         mCalendarView = (CalendarView) findViewById(R.id.calendarView);
@@ -47,11 +49,13 @@ public class CalenderActivity extends AppCompatActivity {
         nothingFoundTextView = (TextView) findViewById(R.id.calender_view_nothing_found);
         mListView = (ListView) findViewById(R.id.calender_view_list_view);
 
+        Typeface font_south_gardens = Typeface.createFromAsset(getAssets(), "fonts/south_gardens.ttf");
+        nothingFoundTextView.setTypeface(font_south_gardens);
+
         int i = mDateFormatter.getYear();
         int i1 = mDateFormatter.getMonth();
         int i2 = mDateFormatter.getDayOfMonth();
         getInfo(i, i1, i2);
-
 
         mCalendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
@@ -63,24 +67,25 @@ public class CalenderActivity extends AppCompatActivity {
                 getInfo(i, i1, i2);
             }
         });
-
     }
 
     void getInfo(int i, int i1, int i2) {
-        String date = String.valueOf(i2) + "/" + String.valueOf(i1 + 1) + "/" + String.valueOf(i);
+        DateFormatter formatter = new DateFormatter();
+        String date = String.valueOf(i2) + "-" + formatter.getMonth(i1) + "-" + String.valueOf(i);
+        Log.e(LOG_TAG, date);
         mCursor = getContentResolver().query(JournalContentProvider.ContentProviderCreator.JOURNAL,
                 null,
                 JournalContract.DATE_CREATED + "=?",
                 new String[]{date},
-                null);
+                "_id DESC");
 
-        if (mCursor.getCount() > 0) {
-            if (nothingFoundTextView.getVisibility() == View.VISIBLE) {
+        if (mCursor.getCount() != 0) {
+            Log.e(LOG_TAG, "Entries Found " + mCursor.getCount() + "\n" + mCursor.toString());
+            if (nothingFoundTextView.getVisibility() == View.VISIBLE)
                 nothingFoundTextView.setVisibility(View.GONE);
-            }
-            if (mListView.getVisibility() == View.GONE) {
+            if (mListView.getVisibility() == View.GONE)
                 mListView.setVisibility(View.VISIBLE);
-            }
+
             mEntryAdapter = new CalenderViewSearchEntryAdapter(mContext, mCursor, 0);
             mListView.setAdapter(mEntryAdapter);
 
@@ -90,19 +95,16 @@ public class CalenderActivity extends AppCompatActivity {
                     int m = mCursor.getInt(Utils._ID_INDEX);
                     Intent intent = new Intent(mContext, ViewActivity.class);
                     intent.putExtra("ID", m);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                     mContext.startActivity(intent);
-                    return;
                 }
             });
         } else {
-            if (mListView.getVisibility() == View.VISIBLE) {
+            Log.e(LOG_TAG, "Cursor was Returned empty");
+            if (mListView.getVisibility() == View.VISIBLE)
                 mListView.setVisibility(View.GONE);
-            }
-            if (nothingFoundTextView.getVisibility() == View.GONE) {
+            if (nothingFoundTextView.getVisibility() == View.GONE)
                 nothingFoundTextView.setVisibility(View.VISIBLE);
-            }
-            Log.d(LOG_TAG, "Cursor was Returned empty");
         }
     }
 }

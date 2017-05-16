@@ -40,7 +40,7 @@ public class WeatherProvider {
     }
 
     public interface WeatherService {
-        @GET("data/2.5/weather?")
+        @GET("data/2.5/weather?units=metric")
         Call<GetWeatherResponse> getWeather(@Query("lat") String latitude, @Query("lon") String longitude, @Query("APPID") String API_KEY);
     }
 

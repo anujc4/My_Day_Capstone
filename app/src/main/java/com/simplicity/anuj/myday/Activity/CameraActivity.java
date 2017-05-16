@@ -3,6 +3,7 @@ package com.simplicity.anuj.myday.Activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.simplicity.anuj.myday.R;
 
@@ -13,13 +14,16 @@ public class CameraActivity extends Activity implements CameraActivityFragment.V
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(this, AddEntryActivity.class);
+        Intent intent = new Intent();
         if (path != null) {
-            intent.putExtra("path", path);
+            Log.e(LOG_TAG + "SUCCESS", path);
+            setResult(RESULT_OK, intent);
+            intent.putExtra("video_path", path);
         } else {
-            intent.putExtra("path", "null");
+            Log.e(LOG_TAG, "FAIL");
+            setResult(RESULT_CANCELED, intent);
+            intent.putExtra("video_path", "null");
         }
-        startActivity(intent);
         super.onBackPressed();
     }
 
@@ -33,7 +37,6 @@ public class CameraActivity extends Activity implements CameraActivityFragment.V
                     .commit();
         }
     }
-
 
     @Override
     public void onDataPass(String path) {

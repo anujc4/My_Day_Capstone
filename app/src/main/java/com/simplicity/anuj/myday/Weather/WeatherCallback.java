@@ -6,6 +6,5 @@ package com.simplicity.anuj.myday.Weather;
 
 public interface WeatherCallback {
     void onEventCompleted();
-
     void onEventFailed();
 }

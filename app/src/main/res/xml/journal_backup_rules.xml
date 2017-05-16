@@ -6,7 +6,4 @@
     <include
         domain="database"
         path="journalDatabaseCreator.db" />
-    <exclude
-        domain="file"
-        path="instant-run" />
 </full-backup-content>

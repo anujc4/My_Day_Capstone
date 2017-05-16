@@ -3,7 +3,6 @@ package com.simplicity.anuj.myday.Weather;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,11 +39,11 @@ public class WeatherMainFragment extends android.app.Fragment {
         String NAME_WEATHER = getArguments().getString(Utils.NAME_WEATHER);
 
         weatherDescriptionTextView.setText(WEATHER_DESCRIPTION_WEATHER);
-        mainPressureTextView.setText(MAIN_PRESSURE_WEATHER);
-        mainHumidityTextView.setText(MAIN_HUMIDITY_WEATHER);
-        mainTempMinTextView.setText(MAIN_TEMP_MIN_WEATHER);
-        mainTempMaxTextView.setText(MAIN_TEMP_MAX_WEATHER);
-        cloudsTextView.setText(CLOUDS_WEATHER);
+        mainPressureTextView.setText("Pressure: " + MAIN_PRESSURE_WEATHER + " atm");
+        mainHumidityTextView.setText("Humidity: " + MAIN_HUMIDITY_WEATHER + " %");
+        mainTempMinTextView.setText(MAIN_TEMP_MIN_WEATHER + " " + (char) 0x00B0 + "C");
+        mainTempMaxTextView.setText(MAIN_TEMP_MAX_WEATHER + " " + (char) 0x00B0 + "C");
+        cloudsTextView.setText("Wind Speed: " + CLOUDS_WEATHER + " kmph");
         nameTextView.setText(NAME_WEATHER);
 
         int WEATHER_CONDITION_ID = getDrawableResourceForWeatherCondition(getArguments().getInt(Utils.WEATHER_CONDITION_ID));

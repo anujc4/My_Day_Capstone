@@ -6,10 +6,15 @@
     <color name="Transparent">#00000000</color>
     <color name="White">#FAFAFA</color>
     <color name="Black">#424242</color>
-    <color name="AppIntro1">#9575CD</color>
-    <color name="AppIntro2">#7E57C2</color>
-    <color name="AppIntro3">#673AB7</color>
-    <color name="AppIntro4">#5E35B1</color>
+
+    <color name="AppIntro1">#90A4AE</color>
+    <color name="AppIntro2">#78909C</color>
+    <color name="AppIntro3">#546E7A</color>
+    <color name="AppIntro4">#263238</color>
+
+    <color name="google_sign_in_light">#455A64</color>
+    <color name="google_sign_in_dark">#263238</color>
+
 
     <color name="black_overlay">#66000000</color>
     <color name="grey_700">#646464</color>

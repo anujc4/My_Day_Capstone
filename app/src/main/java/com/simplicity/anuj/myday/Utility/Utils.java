@@ -1,7 +1,5 @@
 package com.simplicity.anuj.myday.Utility;
 
-import android.content.Context;
-
 /**
  * Created by anuj on 9/30/2016.
  */
@@ -28,19 +26,21 @@ public class Utils {
     public static final int _ID_MAIN_LOCATION_INDEX = 1;
     public static final int LATITUDE_INDEX = 2;
     public static final int LONGITUDE_INDEX = 3;
-    public static final int _ID_WEATHER_INDEX = 1;
-    public static final int _ID_MAIN_WEATHER_INDEX = 2;
-    public static final int WEATHER_CONDITION_INDEX = 3;
-    public static final int WEATHER_MAIN_INDEX = 4;
-    public static final int WEATHER_DESCRIPTION_INDEX = 5;
-    public static final int MAIN_TEMP_INDEX = 6;
-    public static final int MAIN_TEMP_MIN_INDEX = 7;
-    public static final int MAIN_TEMP_MAX_INDEX = 8;
-    public static final int MAIN_HUMIDITY_INDEX = 9;
-    public static final int MAIN_PRESSURE_INDEX = 10;
-    public static final int WIND_SPEED_INDEX = 11;
-    public static final int CLOUDS_INDEX = 12;
-    public static final int NAME_INDEX = 13;
+
+
+    public static final int _ID_WEATHER_INDEX = 0;
+    public static final int _ID_MAIN_WEATHER_INDEX = 1;
+    public static final int WEATHER_CONDITION_INDEX = 2;
+    public static final int WEATHER_MAIN_INDEX = 3;
+    public static final int WEATHER_DESCRIPTION_INDEX = 4;
+    public static final int MAIN_TEMP_INDEX = 5;
+    public static final int MAIN_TEMP_MIN_INDEX = 6;
+    public static final int MAIN_TEMP_MAX_INDEX = 7;
+    public static final int MAIN_HUMIDITY_INDEX = 8;
+    public static final int MAIN_PRESSURE_INDEX = 9;
+    public static final int WIND_SPEED_INDEX = 10;
+    public static final int CLOUDS_INDEX = 11;
+    public static final int NAME_INDEX = 12;
 
     public static final String _ID_JOURNAL = "_id";
     public static final String TITLE_JOURNAL = "title";
@@ -73,13 +73,12 @@ public class Utils {
     public static final String MAIN_PRESSURE_WEATHER = "main_pressure";
     public static final String CLOUDS_WEATHER = "clouds";
     public static final String NAME_WEATHER = "name";
-    public static Context c;
+
+//    Typeface font_south_gardens = Typeface.createFromAsset(getAssets(),  "fonts/south_gardens.ttf");
+//    Typeface font_adlanta = Typeface.createFromAsset(getAssets(),  "fonts/adlanta.ttf");
+//    Typeface font_adlanta_light = Typeface.createFromAsset(getAssets(),  "fonts/adlanta_light.ttf");
+
 
     public Utils() {
     }
-
-    public Utils(Context c) {
-        this.c = c;
-    }
-
 }

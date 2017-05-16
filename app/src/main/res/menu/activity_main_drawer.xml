@@ -3,9 +3,13 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
+            android:id="@+id/nav_person"
+            android:icon="@drawable/ic_person_black_24dp"
+            android:title="Manage Account" />
+        <!--<item-->
+        <!--android:id="@+id/nav_gallery"-->
+        <!--android:icon="@drawable/ic_photo_library_black_24dp"-->
+        <!--android:title="Gallery" />-->
 
         <item
             android:id="@+id/nav_calender"
@@ -22,17 +26,17 @@
         <menu>
             <item
                 android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
+                android:icon="@drawable/ic_share_black_24dp"
                 android:title="Share" />
+
             <item
                 android:id="@+id/nav_help"
                 android:icon="@drawable/ic_help_outline_black_24dp"
                 android:title="Help"/>
             <item
                 android:id="@+id/nav_about"
-
+                android:icon="@drawable/ic_code_black_24dp"
                 android:title="About"/>
-            <!--android:icon="@drawable/ic_info_black_24dp"-->
         </menu>
 
     </item>

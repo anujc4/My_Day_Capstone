@@ -10,30 +10,41 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?android:attr/listPreferredItemHeightSmall">
-
-
         <TextView
             android:id="@+id/widget_title_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#09C"
-            android:textSize="20sp" />
-
+            android:layout_gravity="center"
+            android:background="#EEEEEE"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="40sp"
+            android:textStyle="italic"
+            android:fontFamily="cursive"
+            android:textColor="@color/colorPrimary" />
+        <!--android:paddingTop="10dp"-->
+        <!--android:paddingBottom="10dp"-->
     </FrameLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1">
-
-
         <ListView
             android:id="@+id/widget_list_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:divider="@null"
-            android:dividerHeight="0dp"
+            android:dividerHeight="1dp"
             tools:listitem="@layout/widget_collection_item" />
+
+        <TextView
+            android:id="@+id/empty_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/empty_string"
+            android:textColor="#ffffff"
+            android:textSize="20sp"
+            android:visibility="gone" />
     </FrameLayout>
 
 

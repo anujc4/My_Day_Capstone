@@ -1,6 +1,5 @@
 package com.simplicity.anuj.myday.LocationService;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -12,8 +11,6 @@ import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.simplicity.anuj.myday.Activity.AddEntryActivity;
@@ -22,23 +19,23 @@ import com.simplicity.anuj.myday.Activity.AddEntryActivity;
  * Created by anujc on 4/2/2017.
  */
 
-public class LocationFetcher implements LocationInterface, OnConnectionFailedListener, ConnectionCallbacks {
+public class LocationFetcher implements LocationInterface {
     private static final String LOG_TAG = LocationFetcher.class.getCanonicalName();
-    public boolean GPSGenerated = false;
     private GoogleApiClient mGoogleApiClient;
     private Context mContext;
     private static double lt = -1;
     private static double ln = -1;
+    private LocationStatusListener listener;
 
     public LocationFetcher(Context c) {
         this.mContext = c;
+        listener = null;
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(mContext)
                     .addApi(LocationServices.API)
                     .addOnConnectionFailedListener(this)
                     .addConnectionCallbacks(this)
                     .build();
-
             if (!mGoogleApiClient.isConnected())
                 mGoogleApiClient.connect();
         }
@@ -64,8 +61,7 @@ public class LocationFetcher implements LocationInterface, OnConnectionFailedLis
 
         //For the time being that LocationRequest tries to get the latest location coordinates
         //set the lt and ln values to the last known location
-        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
+        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mLastLocation != null) {
             lt = mLastLocation.getLatitude();
             ln = mLastLocation.getLongitude();
@@ -86,8 +82,8 @@ public class LocationFetcher implements LocationInterface, OnConnectionFailedLis
     public void onLocationChanged(Location location) {
         lt = location.getLatitude();
         ln = location.getLongitude();
-        GPSGenerated = true;
-        Log.d(LOG_TAG, lt + "   " + ln);
+        listener.onLocationReceived();
+        Log.d(LOG_TAG, lt + " " + ln);
     }
 
 
@@ -119,4 +115,10 @@ public class LocationFetcher implements LocationInterface, OnConnectionFailedLis
     public double fetchLongitude() {
         return ln;
     }
+
+    public void setOnLocationChangedListener(LocationStatusListener listener) {
+        this.listener = listener;
+    }
+
+    ;
 }

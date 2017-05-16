@@ -3,4 +3,16 @@
     <external-path
         name="my_images"
         path="Pictures" />
+
+    <external-path
+        name="Movies"
+        path="Movies" />
+
+    <external-path
+        name="my_day"
+        path="MyDay" />
+
+    <external-path
+        name="external_files"
+        path="." />
 </paths>

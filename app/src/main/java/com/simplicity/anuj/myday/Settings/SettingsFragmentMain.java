@@ -2,6 +2,7 @@ package com.simplicity.anuj.myday.Settings;
 
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
@@ -12,6 +13,8 @@ import android.preference.SwitchPreference;
 import android.support.annotation.Nullable;
 import android.widget.TimePicker;
 
+import com.simplicity.anuj.myday.Activity.AboutMeActivity;
+import com.simplicity.anuj.myday.Notification.NotificationsSetup;
 import com.simplicity.anuj.myday.R;
 
 import java.util.Calendar;
@@ -28,10 +31,13 @@ public class SettingsFragmentMain extends PreferenceFragment implements TimePick
     private static final String PREFERENCE_EDIT_NAME_OF_USER = "preference_edit_name_of_user";
     private static final String PREFERENCE_SEND_NOTIFICATION = "preference_send_notification";
     private static final String PREFERENCE_CHOOSE_TIME_NOTIFICATIONS = "preference_time_notification";
+    private static final String PREFERENCE_ABOUT_MY_DAY = "preference_about_my_day";
+    private static final String LOG_TAG = SettingsFragmentMain.class.getSimpleName();
 
     EditTextPreference mEditNamePreference;
     SwitchPreference mSwitchPreference;
     Preference mSelectTimePreference;
+    Preference mAboutPreference;
 
     @Override
     public Context getContext() {
@@ -42,6 +48,8 @@ public class SettingsFragmentMain extends PreferenceFragment implements TimePick
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.pref_main_settings);
+        SharedPreferences getPrefs = PreferenceManager
+                .getDefaultSharedPreferences(getContext());
 
         mEditNamePreference = (EditTextPreference) findPreference(PREFERENCE_EDIT_NAME_OF_USER);
         mEditNamePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -54,43 +62,62 @@ public class SettingsFragmentMain extends PreferenceFragment implements TimePick
         });
         bindPreferenceSummaryToValue(mEditNamePreference);
 
+        mSelectTimePreference = findPreference(PREFERENCE_CHOOSE_TIME_NOTIFICATIONS);
+        int hour = getPrefs.getInt("setHour", 0);
+        int min = getPrefs.getInt("setMin", 0);
+        mSelectTimePreference.setSummary(String.format(Locale.ENGLISH, "%02d:%02d", hour, min));
+        mSelectTimePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                createTimePickerDialog();
+                bindPreferenceSummaryToValue(mSelectTimePreference);
+                return true;
+            }
+        });
+
         mSwitchPreference = (SwitchPreference) findPreference(PREFERENCE_SEND_NOTIFICATION);
+        boolean isEnabled = getPrefs.getBoolean(PREFERENCE_SEND_NOTIFICATION, false);
+        if (isEnabled) {
+            mSelectTimePreference.setEnabled(true);
+        } else {
+            mSelectTimePreference.setEnabled(false);
+        }
+
+        final SharedPreferences.Editor editor = getPrefs.edit();
         mSwitchPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 if (newValue instanceof Boolean) {
                     boolean isChecked = (boolean) newValue;
                     if (isChecked) {
+                        editor.putBoolean(PREFERENCE_SEND_NOTIFICATION, true);
                         mSelectTimePreference.setEnabled(true);
                     } else {
+                        editor.putBoolean(PREFERENCE_SEND_NOTIFICATION, false);
                         mSelectTimePreference.setEnabled(false);
                     }
+                    editor.apply();
                 }
                 return true;
             }
         });
-        bindPreferenceSummaryToValue(mSwitchPreference);
 
-        mSelectTimePreference = findPreference(PREFERENCE_CHOOSE_TIME_NOTIFICATIONS);
-        mSelectTimePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        mAboutPreference = findPreference(PREFERENCE_ABOUT_MY_DAY);
+        mAboutPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                createTimePickerDialog();
+                Intent intent = new Intent(getContext(), AboutMeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(intent);
                 return true;
             }
         });
-        bindPreferenceSummaryToValue(mSelectTimePreference);
     }
 
     private void bindPreferenceSummaryToValue(Preference preference) {
         // Set the listener to watch for value changes.
         preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
-        // Trigger the listener immediately with the preference's
-        // current value.
-//        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-//                PreferenceManager
-//                        .getDefaultSharedPreferences(preference.getContext())
-//                        .getString(preference.getKey(), ""));
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(), ""));
     }
 
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
@@ -119,7 +146,6 @@ public class SettingsFragmentMain extends PreferenceFragment implements TimePick
         editor.putInt("setMin", minute);
         editor.apply();
         updateTime();
-
     }
 
     void updateTime() {
@@ -128,6 +154,7 @@ public class SettingsFragmentMain extends PreferenceFragment implements TimePick
         int hour = getPrefs.getInt("setHour", 21);
         int min = getPrefs.getInt("setMin", 0);
         mSelectTimePreference.setSummary(String.format(Locale.ENGLISH, "%02d:%02d", hour, min));
+        new NotificationsSetup(getContext());
     }
 }
 

@@ -7,6 +7,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
@@ -21,7 +22,9 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -41,14 +44,19 @@ import android.widget.Toast;
 import com.simplicity.anuj.myday.R;
 import com.simplicity.anuj.myday.Utility.AutoFitTextureView;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class CameraActivityFragment extends android.app.Fragment
         implements View.OnClickListener, FragmentCompat.OnRequestPermissionsResultCallback {
@@ -65,6 +73,7 @@ public class CameraActivityFragment extends android.app.Fragment
             Manifest.permission.CAMERA,
             Manifest.permission.RECORD_AUDIO,
     };
+    private static final String LOG = CameraActivityFragment.class.getSimpleName();
 
     static {
         DEFAULT_ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -427,6 +436,18 @@ public class CameraActivityFragment extends android.app.Fragment
             }
             configureTransform(width, height);
             mMediaRecorder = new MediaRecorder();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+            }
             manager.openCamera(cameraId, mStateCallback, null);
         } catch (CameraAccessException e) {
             Toast.makeText(activity, "Cannot access the camera.", Toast.LENGTH_SHORT).show();
@@ -560,6 +581,7 @@ public class CameraActivityFragment extends android.app.Fragment
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
             mNextVideoAbsolutePath = getVideoFilePath(getActivity());
+            Log.e(LOG, mNextVideoAbsolutePath);
         }
         mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
         mMediaRecorder.setVideoEncodingBitRate(10000000);
@@ -580,8 +602,32 @@ public class CameraActivityFragment extends android.app.Fragment
     }
 
     private String getVideoFilePath(Context context) {
-        return context.getExternalFilesDir(null).getAbsolutePath() + "/"
-                + System.currentTimeMillis() + ".mp4";
+
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "MYDAY_" + timeStamp + "_";
+        File storageDir;
+        File video;
+        try {
+            SharedPreferences preferences = getActivity().getSharedPreferences("com.simplicity.anuj.myday.FileDirectory", MODE_PRIVATE);
+            String defaultFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).getAbsolutePath();
+            String path = preferences.getString("file_dir_video", defaultFolder);
+            storageDir = new File(path);
+            video = File.createTempFile(
+                    imageFileName,  /* prefix */
+                    ".mp4",         /* suffix */
+                    storageDir      /* directory */
+            );
+            return video.getAbsolutePath();
+        } catch (IOException e) {
+            Log.e(LOG, "Unable to create Video File");
+            e.printStackTrace();
+        } catch (SecurityException s) {
+            Log.e(LOG, "Unable to create Video File due to missing Permissions");
+            s.printStackTrace();
+        }
+        return null;
+//        return context.getExternalFilesDir(null).getAbsolutePath() + "/"
+//                + System.currentTimeMillis() + ".mp4";
     }
 
     private void startRecordingVideo() {
@@ -661,9 +707,9 @@ public class CameraActivityFragment extends android.app.Fragment
 
         Activity activity = getActivity();
         if (null != activity) {
-            Toast.makeText(activity, "Video saved: " + mNextVideoAbsolutePath,
-                    Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Video saved: " + mNextVideoAbsolutePath);
+//            Toast.makeText(activity, "Video saved: " + mNextVideoAbsolutePath,
+//                    Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Video saved: " + mNextVideoAbsolutePath);
             mVideoPathTransfer.onDataPass(mNextVideoAbsolutePath);
         }
         mNextVideoAbsolutePath = null;
@@ -671,7 +717,7 @@ public class CameraActivityFragment extends android.app.Fragment
     }
 
     public interface VideoPathTransfer {
-        public void onDataPass(String path);
+        void onDataPass(String path);
     }
 
     /**

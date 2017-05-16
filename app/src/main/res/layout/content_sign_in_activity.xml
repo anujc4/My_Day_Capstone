@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="69.96"
+        android:id="@+id/relative_layout_sign_in_activity_top"
+        android:background="@color/google_sign_in_light"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:contentDescription="Google Logo"
+            android:layout_marginTop="75dp"
+            android:layout_centerHorizontal="true"
+            android:scaleType="fitCenter"
+            android:id="@+id/google_logo_image_view"
+            android:src="@drawable/google_logo" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="20dp"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:layout_below="@+id/google_logo_image_view"
+            android:id="@+id/message_to_show_sign_in"
+            android:text="@string/it_will_be_easier_for_my_day_to_know_you_if_you_sign_in_its_easy_and_takes_just_seconds" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="30"
+        android:id="@+id/relative_layout_sign_in_activity_bottom"
+        android:background="@color/google_sign_in_dark">
+
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/sign_in_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/sign_out_button"
+            android:text="@string/sign_out"
+            android:visibility="gone"
+            android:layout_centerInParent="true" />
+    </RelativeLayout>
+
+
+</LinearLayout>

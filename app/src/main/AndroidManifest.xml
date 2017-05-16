@@ -12,13 +12,11 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
 
-    <uses-feature
-        android:name="android.hardware.CAMERA"
-        android:required="true" />
+    <uses-feature android:name="android.hardware.CAMERA" />
     <uses-feature android:name="android.hardware.location.gps" />
-    <uses-feature
-        android:glEsVersion="0x00020000"
-        android:required="true" />
+    <!--<uses-feature-->
+    <!--android:glEsVersion="0x00020000"-->
+    <!--android:required="true" />-->
 
     <application
         android:allowBackup="true"
@@ -34,20 +32,6 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBfsX239Q42v4jbDOBwQDo_OL0P_DFzxfk" />
-
-        <provider
-            android:name="android.support.v4.content.FileProvider"
-            android:authorities="com.anuj.simplicity.myday.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
-        <provider
-            android:name=".Data.generated.JournalContentProvider"
-            android:authorities="com.simplicity.anuj.myday1"
-            android:exported="true" />
 
         <activity
             android:name=".Activity.MainActivity"
@@ -111,16 +95,6 @@
                 android:value="com.simplicity.anuj.myday.Activity.MainActivity" />
         </activity>
 
-        <receiver android:name=".Widget.MyDayAppWidget">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/my_day_app_widget_info" />
-        </receiver>
-
         <activity
             android:name=".Activity.CameraActivity"
             android:label="@string/title_activity_camera"
@@ -130,13 +104,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.simplicity.anuj.myday.Activity.AddEntryActivity" />
         </activity>
-        <activity android:name=".Activity.ViewWeatherActivity" />
+
         <activity
             android:name=".Activity.FullscreenImageViewActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_fullscreen_image_view"
             android:parentActivityName=".Activity.MainActivity"
             android:theme="@style/FullscreenTheme">
+
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.simplicity.anuj.myday.Activity.MainActivity" />
@@ -149,8 +124,44 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activity.MainActivity" />
         </activity>
-        <activity android:name=".Identity.SignInActivity" />
-        <activity android:name=".Identity.FirebaseSignInActivity"></activity>
+
+        <activity
+            android:name=".Identity.FirebaseSignInActivity"
+            android:label="Sign In"
+            android:parentActivityName=".Activity.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".Activity.MainActivity" />
+        </activity>
+
+        <receiver android:name=".Widget.MyDayAppWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/my_day_app_widget_info" />
+        </receiver>
+        <service
+            android:name=".Widget.JournalRemoteViewsService"
+            android:exported="false" />
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.anuj.simplicity.myday.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <provider
+            android:name=".Data.generated.JournalContentProvider"
+            android:authorities="com.simplicity.anuj.myday1"
+            android:exported="true" />
+
+        <receiver android:name=".Notification.AlarmReceiver" />
     </application>
 
 </manifest>

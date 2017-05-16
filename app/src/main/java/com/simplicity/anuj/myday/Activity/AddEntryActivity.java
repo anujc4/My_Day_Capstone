@@ -4,7 +4,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -30,18 +33,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.simplicity.anuj.myday.Adapter.CameraPicsAdapter;
+import com.simplicity.anuj.myday.Adapter.CameraVideoAdapter;
+import com.simplicity.anuj.myday.Data.JournalContentProvider;
 import com.simplicity.anuj.myday.LocationService.LocationFetcher;
+import com.simplicity.anuj.myday.LocationService.LocationStatusListener;
 import com.simplicity.anuj.myday.R;
 import com.simplicity.anuj.myday.Utility.CommitDatabase;
 import com.simplicity.anuj.myday.Utility.DateFormatter;
+import com.simplicity.anuj.myday.Utility.IDTransfer;
 import com.simplicity.anuj.myday.Utility.Utils;
 import com.simplicity.anuj.myday.Weather.FetchWeatherData;
 import com.simplicity.anuj.myday.Weather.GetWeatherResponse;
 import com.simplicity.anuj.myday.Weather.Main;
 import com.simplicity.anuj.myday.Weather.Weather;
 import com.simplicity.anuj.myday.Weather.WeatherCallback;
-import com.simplicity.anuj.myday.Weather.Wind;
 import com.simplicity.anuj.myday.Weather.WeatherMainFragment;
+import com.simplicity.anuj.myday.Weather.Wind;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,18 +59,18 @@ import java.util.List;
 
 import retrofit2.Response;
 
-import static android.support.v4.content.FileProvider.getUriForFile;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-public class AddEntryActivity extends AppCompatActivity implements WeatherCallback {
+public class AddEntryActivity extends AppCompatActivity implements IDTransfer {
 
     static final int REQUEST_TAKE_PHOTO = 1001;
+    static final int REQUEST_TAKE_VIDEO = 2001;
+
     private static boolean recordLocation;
     final ContentValues mWeatherContentValues = new ContentValues();
     final ContentValues mLocationContentValues = new ContentValues();
     final ContentValues mJournalContentValues = new ContentValues();
-    final ContentValues mMediaContentValues = new ContentValues();
     private final String LOG_TAG = AddEntryActivity.class.getSimpleName();
     DateFormatter mDateFormatter;
     String mCurrentPhotoPath;
@@ -80,9 +87,12 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
     FrameLayout mFrameLayoutWeather;
     static Boolean isWeatherFragmentShown;
     WeatherMainFragment viewWeatherData;
+    FrameLayout mFrameLayoutAddEntryLayout;
 
-    RecyclerView mRecyclerView;
+    RecyclerView mRecyclerViewImages;
+    RecyclerView mRecyclerViewVideos;
     CameraPicsAdapter mCameraPicsAdapter;
+    CameraVideoAdapter mCameraVideoAdapter;
 
     LocationFetcher mLocationFetcher;
     static Response<GetWeatherResponse> response;
@@ -92,6 +102,7 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
     ArrayList<String> mImageArray;
     ArrayList<String> mVideoArray;
     String firstImage;
+    static long _id_main;
     boolean hasThumbImage;
 
     @Override
@@ -110,7 +121,7 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
         recordLocation = true;
 
         isWeatherFragmentShown = false;
-        mLocationFetcher = new LocationFetcher(mContext);
+        mLocationFetcher = new LocationFetcher(this);
 
         ActionBar bar = getSupportActionBar();
         if (bar != null)
@@ -127,21 +138,55 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
         GeotagButton = (ImageButton) findViewById(R.id.switch_geo_location_button);
         mFrameLayout = (FrameLayout) findViewById(R.id.frame_layout_view_location_map);
         mFrameLayout.setVisibility(GONE);
-        mRecyclerView = (RecyclerView) findViewById(R.id.add_entry_images_recycler_view);
-        mRecyclerView.setVisibility(GONE);
+        mFrameLayoutAddEntryLayout = (FrameLayout) findViewById(R.id.frame_layout_add_entry);
+        mRecyclerViewImages = (RecyclerView) findViewById(R.id.add_entry_images_recycler_view);
+        mRecyclerViewImages.setVisibility(GONE);
+        mRecyclerViewVideos = (RecyclerView) findViewById(R.id.add_entry_videos_recycler_view);
+        mRecyclerViewVideos.setVisibility(GONE);
+
         mCameraPicsAdapter = new CameraPicsAdapter(mImageArray, mContext);
         LinearLayoutManager manager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
-        mRecyclerView.setLayoutManager(manager);
-        mRecyclerView.setAdapter(mCameraPicsAdapter);
+        mRecyclerViewImages.setLayoutManager(manager);
+        mRecyclerViewImages.setAdapter(mCameraPicsAdapter);
+
+        mCameraVideoAdapter = new CameraVideoAdapter(mVideoArray, mContext);
+        LinearLayoutManager manager1 = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
+        mRecyclerViewVideos.setLayoutManager(manager1);
+        mRecyclerViewVideos.setAdapter(mCameraVideoAdapter);
 
         mFrameLayoutWeather = (FrameLayout) findViewById(R.id.frame_layout_view_weather_data);
         viewWeatherData = new WeatherMainFragment();
 
-
         mDateFormatter = new DateFormatter();
-        Log.e(LOG_TAG, String.valueOf(mLocationFetcher.fetchLatitude()));
 
-        fetchWeatherData = new FetchWeatherData(mLocationFetcher, this);
+        Typeface title_font = Typeface.createFromAsset(getAssets(), "fonts/adlanta.ttf");
+        Typeface entry_font = Typeface.createFromAsset(getAssets(), "fonts/adlanta_light.ttf");
+        editTitleAddEntry.setTypeface(title_font);
+        editTextAddEntry.setTypeface(entry_font);
+        CurrentDayTextView.setTypeface(title_font);
+        CurrentDayTextView.setTypeface(title_font);
+
+        Log.e(LOG_TAG, String.valueOf(mLocationFetcher.fetchLatitude()));
+        mLocationFetcher.setOnLocationChangedListener(new LocationStatusListener() {
+            @Override
+            public void onLocationReceived() {
+                fetchWeatherData = new FetchWeatherData(mLocationFetcher);
+                fetchWeatherData.setFetchWeatherListener(new WeatherCallback() {
+                    @Override
+                    public void onEventCompleted() {
+                        Log.e(LOG_TAG, "Succeded to get Weather Data.");
+                        response = fetchWeatherData.fetchAPI();
+                        Log.e(LOG_TAG, response.toString());
+                    }
+
+                    @Override
+                    public void onEventFailed() {
+                        response = null;
+                        Log.e(LOG_TAG, "FAILED TO GET");
+                    }
+                });
+            }
+        });
 
         Intent intent = getIntent();
         if (intent.hasExtra("path")) {
@@ -151,7 +196,7 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
         AddImagefromCameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mRecyclerView.setVisibility(VISIBLE);
+                mRecyclerViewImages.setVisibility(VISIBLE);
                 dispatchTakePictureIntent();
             }
         });
@@ -160,7 +205,8 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(mContext, CameraActivity.class);
-                startActivity(intent);
+//                startActivity(intent);
+                startActivityForResult(intent, REQUEST_TAKE_VIDEO);
             }
         });
 
@@ -174,6 +220,18 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
         tempParams.setMargins(sides, top, sides, bottom);
         mFrameLayoutWeather.setLayoutParams(tempParams);
 
+
+        mFrameLayoutAddEntryLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (viewWeatherData.isVisible()) {
+                    mFrameLayoutWeather.setVisibility(GONE);
+                    getFragmentManager().beginTransaction()
+                            .remove(viewWeatherData)
+                            .commit();
+                }
+            }
+        });
         WeatherButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -221,7 +279,6 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
                             }
                         }.execute();
                     } else {
-//                        Log.e(LOG_TAG, "ERROR : RESPONSE IS NULL");
                         //Show an Alert Dialog
                         new AlertDialog.Builder(mContext)
                                 .setTitle("Error")
@@ -238,7 +295,6 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
                 } else {
                     isWeatherFragmentShown = false;
                     mFrameLayoutWeather.setVisibility(GONE);
-
                 }
 
             }
@@ -247,13 +303,12 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
         GeotagButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 if (recordLocation) {
                     recordLocation = false;
-                    GeotagButton.setBackgroundResource(R.drawable.ic_geotag_disable);
+                    GeotagButton.setBackgroundResource(R.drawable.ic_location_disabled_white_24dp);
                 } else {
                     recordLocation = true;
-                    GeotagButton.setBackgroundResource(R.drawable.ic_action_name);
+                    GeotagButton.setBackgroundResource(R.drawable.ic_my_location_white_24dp);
                 }
             }
         });
@@ -265,13 +320,13 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
         CurrentDateTextView.setText(mDateFormatter.getDate());
         CurrentDayTextView.setText(mDateFormatter.getDay());
 
-
         //Going to add entry into database now
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabInsertEntry);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 addEntry();
+                onBackPressed();
             }
         });
     }
@@ -304,7 +359,7 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
             isWeatherFragmentShown = false;
             return;
         }
-        addEntry();
+//        addEntry();
         super.onBackPressed();
     }
 
@@ -329,7 +384,7 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
         mJournalContentValues.put(Utils.TIME_MODIFIED_JOURNAL, time);
 
         //Geo-Location Details in Database Entry
-        if (mLocationFetcher.GPSGenerated && recordLocation) {
+        if (recordLocation) {
             mJournalContentValues.put(Utils.HAS_LOCATION_JOURNAL, 1);
             mLocationContentValues.put(Utils.LATITUDE_LOCATION, mLocationFetcher.fetchLatitude());
             mLocationContentValues.put(Utils.LONGITUDE_LOCATION, mLocationFetcher.fetchLongitude());
@@ -341,12 +396,51 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
         else
             mJournalContentValues.put(Utils.THUMB_PATH_JOURNAL, "null");
 
+        if (response != null)
+            mJournalContentValues.put(Utils.HAS_WEATHER_JOURNAL, "1");
+        else
+            mJournalContentValues.put(Utils.HAS_WEATHER_JOURNAL, "-1");
 
+        //Call the Async Task to commit to database
+        new CommitDatabase(mContext).execute(mJournalContentValues, mLocationContentValues, mWeatherContentValues);
+
+        //ASYNC TASK to enter Images
         if (!mImageArray.isEmpty()) {
-            for (String element : mImageArray)
-                mMediaContentValues.put(Utils.IMAGE_PATH_MULTIMEDIA, element);
+            String[] tempArray = (String[]) mImageArray.toArray(new String[mImageArray.size()]);
+            new AsyncTask<String, Void, Void>() {
+                @Override
+                protected Void doInBackground(String... params) {
+                    ContentValues mTempContentValues = new ContentValues();
+                    for (String path : params) {
+                        mTempContentValues.put(Utils._ID_MAIN_MULTIMEDIA, _id_main);
+                        mTempContentValues.put(Utils.IMAGE_PATH_MULTIMEDIA, path);
+                        mContext.getContentResolver().insert(JournalContentProvider.MultimediaContentProviderCreator.MULTIMEDIA,
+                                mTempContentValues);
+                        Log.e(LOG_TAG, "Images Values Entered Successfully");
+                    }
+                    return null;
+                }
+            }.execute(tempArray);
         }
 
+        //ASYNC TASK to enter Videos
+        if (!mVideoArray.isEmpty()) {
+            String[] tempArray = (String[]) mVideoArray.toArray(new String[mVideoArray.size()]);
+            new AsyncTask<String, Void, Void>() {
+                @Override
+                protected Void doInBackground(String... params) {
+                    ContentValues mTempContentValues = new ContentValues();
+                    for (String path : params) {
+                        mTempContentValues.put(Utils._ID_MAIN_MULTIMEDIA, _id_main);
+                        mTempContentValues.put(Utils.VIDEO_PATH_MULTIMEDIA, path);
+                        mContext.getContentResolver().insert(JournalContentProvider.MultimediaContentProviderCreator.MULTIMEDIA,
+                                mTempContentValues);
+                        Log.e(LOG_TAG, "Video Values Entered Successfully");
+                    }
+                    return null;
+                }
+            }.execute(tempArray);
+        }
 
         //Fetch Weather Data and Inset it into Content Values
         if (response != null) {
@@ -366,12 +460,8 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
             Log.d(LOG_TAG, mWeatherContentValues.toString());
 
         }
-        //Call the Async Task to commit to database
-        new CommitDatabase(mContext).execute(mJournalContentValues, mLocationContentValues, mMediaContentValues, mWeatherContentValues);
 
         Toast.makeText(mContext, "Entry Added Successfully", Toast.LENGTH_SHORT).show();
-        Intent i = new Intent(mContext, MainActivity.class);
-        startActivity(i);
     }
 
 
@@ -392,9 +482,8 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-
                 try {
-                    photoURI = getUriForFile(this, "com.anuj.simplicity.myday.fileprovider", photoFile);
+                    photoURI = FileProvider.getUriForFile(mContext, "com.anuj.simplicity.myday.fileprovider", photoFile);
                 } catch (IllegalArgumentException e) {
                     Log.e(LOG_TAG, "File Outside Path Provided Error");
                     e.printStackTrace();
@@ -414,7 +503,10 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
         File storageDir = null;
         File image = null;
         try {
-            storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            SharedPreferences preferences = getSharedPreferences("com.simplicity.anuj.myday.FileDirectory", 0);
+            String defaultFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath();
+            String path = preferences.getString("file_dir_image", defaultFolder);
+            storageDir = new File(path);
             image = File.createTempFile(
                     imageFileName,  /* prefix */
                     ".jpg",         /* suffix */
@@ -480,22 +572,29 @@ public class AddEntryActivity extends AppCompatActivity implements WeatherCallba
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d(LOG_TAG, "onActivityResult Invoked");
+        //IMAGE
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             mImageArray.add(mCurrentPhotoPath);
+            mCameraPicsAdapter.notifyDataSetChanged();
             Log.e(LOG_TAG, "ADDED TO mImageArray" + mCurrentPhotoPath);
+        }
+
+        //VIDEO
+        if (requestCode == REQUEST_TAKE_VIDEO && resultCode == RESULT_OK) {
+            if (!data.getStringExtra("video_path").equals("null")) {
+                Log.e(LOG_TAG, "Video Path Passed successfully" + data.getStringExtra("video_path"));
+                mRecyclerViewVideos.setVisibility(VISIBLE);
+                mVideoArray.add(data.getStringExtra("video_path"));
+                mCameraVideoAdapter.notifyDataSetChanged();
+            } else
+                Log.e(LOG_TAG, "Video Path was not passed back");
+        } else if (requestCode == REQUEST_TAKE_VIDEO && resultCode == RESULT_CANCELED) {
+            Log.e(LOG_TAG, "You pressed Back Button");
         }
     }
 
     @Override
-    public void onEventCompleted() {
-        response = fetchWeatherData.fetchAPI();
-        Log.e(LOG_TAG, "SUCCESS");
-        Log.e(LOG_TAG, response.toString());
-    }
-
-    @Override
-    public void onEventFailed() {
-
+    public void idOfEntry(long id) {
+        _id_main = id;
     }
 }

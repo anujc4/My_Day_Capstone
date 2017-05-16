@@ -85,7 +85,7 @@
     <string name="take_photo">Take Photo</string>
     <string name="turn_geotag_on_off">Turn GeoTag On/Off</string>
     <string name="title_activity_view_activity2">Day Entry</string>
-    <string name="nothing_found">Nothing Found</string>
+    <string name="nothing_found">No Entries Found</string>
 
     <string-array name="list_preference_entries">
         <item>Entry 1</item>
@@ -114,11 +114,18 @@
     <string name="weather_data">Weather Data</string>
     <string name="ErrorMessageRetrofit">Failed to feth Weather Data. Please check your network settings and try again.</string>
 
-    <string name="title_activity_fullscreen_image_view">FullscreenImageViewActivity</string>
+    <string name="title_activity_fullscreen_image_view">My Day</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="delete_image">Delete Image?</string>
     <string name="yes">Yes</string>
     <string name="no_delete">No</string>
-    <string name="loading">Please Wait...</string>
+    <string name="loading">Please Wait…</string>
+    <string name="top_image">Top Image</string>
+    <string name="it_will_be_easier_for_my_day_to_know_you_if_you_sign_in_its_easy_and_takes_just_seconds">It will be easier for My Day to get to know you if you Sign In. It\'s easy and takes just seconds.</string>
+    <string name="empty_message">Seems that you have no Entries yet. Press Add Button to make some new Memories.</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="empty_string">Nothing to show.</string>
+    <string name="beta_version">Beta Version</string>
+    <string name="myday">MyDay</string>
 </resources>

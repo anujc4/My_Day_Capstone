@@ -17,9 +17,11 @@ import com.simplicity.anuj.myday.Data.JournalContentProvider;
 public class CommitDatabase extends AsyncTask<ContentValues, Void, Void> {
     private static final String LOG_TAG = CommitDatabase.class.getCanonicalName();
     private Context mContext;
+    private IDTransfer mTransfer;
 
     public CommitDatabase(Context mContext) {
         this.mContext = mContext;
+        mTransfer = (IDTransfer) mContext;
     }
 
     @Override
@@ -31,22 +33,20 @@ public class CommitDatabase extends AsyncTask<ContentValues, Void, Void> {
             /*
             contentValues[0] : mJournalContentValues
             contentValues[1] : mLocationContentValues
-            contentValues[2] : mMediaContentValues
-            contentValues[3] : mWeatherContentValues
+            contentValues[2] : mWeatherContentValues
              */
 
             Uri result = mContext.getContentResolver().insert(JournalContentProvider.ContentProviderCreator.JOURNAL, contentValues[0]);
             long id = ContentUris.parseId(result);
 
+            mTransfer.idOfEntry(id);
             contentValues[1].put(Utils._ID_MAIN_LOCATION, id);
-            contentValues[2].put(Utils._ID_MAIN_MULTIMEDIA, id);
-            contentValues[3].put(Utils._ID_MAIN_WEATHER, id);
+            contentValues[2].put(Utils._ID_MAIN_WEATHER, id);
 
-            Log.e(LOG_TAG, String.valueOf(contentValues[3]));
+            Log.e(LOG_TAG, String.valueOf(contentValues[2]));
 
             mContext.getContentResolver().insert(JournalContentProvider.LocationContentProviderCreator.LOCATION, contentValues[1]);
-            mContext.getContentResolver().insert(JournalContentProvider.MultimediaContentProviderCreator.MULTIMEDIA, contentValues[2]);
-            mContext.getContentResolver().insert(JournalContentProvider.WeatherContentProviderCreator.WEATHER, contentValues[3]);
+            mContext.getContentResolver().insert(JournalContentProvider.WeatherContentProviderCreator.WEATHER, contentValues[2]);
         }
         return null;
     }

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory android:title="User Details">
         <EditTextPreference
@@ -24,10 +23,8 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="About">
-        <Preference android:title="About">
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:targetClass="com.simplicity.anuj.myday.Activity.AboutMeActivity" />
-        </Preference>
+        <Preference
+            android:title="About"
+            android:key="preference_about_my_day" />
     </PreferenceCategory>
 </PreferenceScreen>

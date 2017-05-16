@@ -8,7 +8,7 @@
         <item name="android:windowActivityTransitions">true</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
         <!-- specify enter and exit transitions -->
-        <item name="android:windowEnterTransition">@transition/explode</item>
-        <item name="android:windowExitTransition">@transition/explode</item>
+        <item name="android:windowEnterTransition">@transition/explode_exit</item>
+        <item name="android:windowExitTransition">@transition/explode_exit</item>
     </style>
 </resources>

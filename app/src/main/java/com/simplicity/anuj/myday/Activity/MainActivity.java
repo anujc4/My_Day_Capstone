@@ -1,22 +1,27 @@
 package com.simplicity.anuj.myday.Activity;
 
-import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.multidex.MultiDex;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -25,31 +30,43 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.transition.Explode;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-//import com.facebook.stetho.Stetho;
+import com.facebook.stetho.Stetho;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.crash.FirebaseCrash;
 import com.simplicity.anuj.myday.Adapter.JournalAdapter;
 import com.simplicity.anuj.myday.Data.JournalContentProvider;
-import com.simplicity.anuj.myday.Identity.SignInActivity;
+import com.simplicity.anuj.myday.Identity.FirebaseSignInActivity;
 import com.simplicity.anuj.myday.IntroActivityUtils.IntroActivity;
 import com.simplicity.anuj.myday.R;
 import com.simplicity.anuj.myday.Settings.Settings;
 import com.simplicity.anuj.myday.Utility.ItemClickListener;
 import com.simplicity.anuj.myday.Utility.Utils;
 
+import java.io.File;
+
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, LoaderManager.LoaderCallbacks<Cursor>, ActivityCompat.OnRequestPermissionsResultCallback, ItemClickListener {
 
 
+    private FirebaseAnalytics mFirebaseAnalytics;
+
     //Loader ID
     private static final int LOADER_ID = 1;
-    private static final int PERMISSION_CODE = 100 ;
+
+    private static final int PERMISSION_CODE = 100;
+    private static final int REQUEST_AUTHENTICATION_CODE = 200;
     private final String LOG_TAG = MainActivity.class.getSimpleName();
     //LIST OF PERMISSIONS NEEDED FROM USER
     private final String PermissionsList[] = {
@@ -59,30 +76,76 @@ public class MainActivity extends AppCompatActivity
             "android.permission.WRITE_EXTERNAL_STORAGE",
             "android.permission.READ_EXTERNAL_STORAGE"
     };
-    Context mContext;
+    private Context mContext;
+    private TextView emptyTextView;
+    private ImageView emptyImageView;
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     private JournalAdapter mJournalAdapter;
+    private FloatingActionButton fab;
+
+    GoogleApiClient mGoogleApiClientDrive;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
-        getWindow().setExitTransition(new Explode());
         super.onCreate(savedInstanceState);
+        mContext = this;
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        Stetho.initializeWithDefaults(this);
-        MultiDex.install(this);
+        Thread AskPermissions = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ActivityCompat.requestPermissions((Activity) mContext, PermissionsList, PERMISSION_CODE);
+            }
+        });
+        AskPermissions.start();
 
-        mContext = this;
+        Stetho.initializeWithDefaults(this);
+        //MultiDex.install(this);
 
-        //TODO Delete in Final Build
-//        mContext.deleteDatabase("JournalDatabaseCreator.db");
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
+        //Obtain the FirebaseCrashReporting instance
+        FirebaseCrash.report(new Exception("MyDay is now enabled Error Reporting."));
 
+        //Initialize Calligraphy
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/adlanta.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build()
+        );
 
+        //Create App Directory
+        String MyDayFolder = Environment.getExternalStorageDirectory().toString();
+        File AppDirectory = new File(MyDayFolder + "/MyDay");
+        final String path = AppDirectory.getAbsolutePath();
+        try {
+            AppDirectory.mkdirs();
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } finally {
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    SharedPreferences fileDirPreferences = getSharedPreferences("com.simplicity.anuj.myday.FileDirectory", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = fileDirPreferences.edit();
+                    editor.putString("file_dir_image", path);
+                    editor.putString("file_dir_video", path);
+                    editor.commit();
+                    return null;
+                }
+            }.execute();
+        }
+
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -90,6 +153,13 @@ public class MainActivity extends AppCompatActivity
         mJournalAdapter = new JournalAdapter(this);
         mJournalAdapter.setClickListener(this);
         mRecyclerView.setAdapter(mJournalAdapter);
+        emptyTextView = (TextView) findViewById(R.id.empty_message_text_view);
+        emptyImageView = (ImageView) findViewById(R.id.empty_message_image_view);
+        Typeface empty_font = Typeface.createFromAsset(getAssets(), "fonts/south_gardens.ttf");
+        emptyTextView.setTypeface(empty_font);
+
+        final View parentLayout = findViewById(R.id.coordinator_layout_activity_main);
+        final Snackbar mSnackbar = Snackbar.make(parentLayout, "Entry Successfully Deleted.", Snackbar.LENGTH_SHORT);
 
         ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START | ItemTouchHelper.END | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
@@ -104,27 +174,54 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                int pos;
-                try {
-                    pos = (int) viewHolder.itemView.getTag();
-                    getContentResolver().delete(JournalContentProvider.ContentProviderCreator.JOURNAL,
-                            Utils._ID_JOURNAL + "=?",
-                            new String[]{String.valueOf(pos)});
-//                Log.d(LOG_TAG, String.valueOf(pos));
-                    mJournalAdapter.notifyDataSetChanged();
-                } catch (NullPointerException e) {
-                    Log.e(LOG_TAG, e.getMessage());
-                    e.printStackTrace();
-                    Toast.makeText(mContext, "Error: Couldn't fetch the Item.", Toast.LENGTH_SHORT).show();
-                }
+                final RecyclerView.ViewHolder tempViewHolder = viewHolder;
+
+                //Add a Callback to Handle Deletion
+                final BaseTransientBottomBar.BaseCallback<Snackbar> snackBarBaseCallback = new BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                    @Override
+                    public void onDismissed(Snackbar transientBottomBar, int event) {
+                        switch (event) {
+                            case Snackbar.BaseCallback.DISMISS_EVENT_TIMEOUT: {
+                                try {
+                                    final int pos = (int) tempViewHolder.itemView.getTag();
+                                    getContentResolver().delete(JournalContentProvider.ContentProviderCreator.JOURNAL,
+                                            Utils._ID_JOURNAL + "=?",
+                                            new String[]{String.valueOf(pos)});
+                                    Log.e(LOG_TAG, "Entry Deleted Successfully");
+                                    mJournalAdapter.notifyDataSetChanged();
+                                } catch (NullPointerException e) {
+                                    Log.e(LOG_TAG, e.getMessage());
+                                    e.printStackTrace();
+                                    Toast.makeText(mContext, "Error: Couldn't fetch the Item.", Toast.LENGTH_SHORT).show();
+                                }
+                                break;
+                            }
+                            default:
+                                Log.e(LOG_TAG, "Some Other Event Detected in Callback.");
+                        }
+                        super.onDismissed(transientBottomBar, event);
+                    }
+                };
+                mSnackbar.addCallback(snackBarBaseCallback);
+
+                //Add UNDO action
+                mSnackbar.setAction("UNDO", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mSnackbar.removeCallback(snackBarBaseCallback);
+                        mJournalAdapter.notifyDataSetChanged();
+                    }
+                });
+                mSnackbar.setActionTextColor(ResourcesCompat.getColor(getResources(), R.color.colorAccent, null));
+                mSnackbar.show();
             }
         };
+
         ItemTouchHelper mHelper = new ItemTouchHelper(callback);
         mHelper.attachToRecyclerView(mRecyclerView);
 
-        Utils utils = new Utils();
+        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         final Intent intent = new Intent(this, AddEntryActivity.class);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,29 +239,17 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-
-        //TODO Setup Notifications in This Part
-
-        //  Declare a new thread to do a preference check
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                //  Initialize SharedPreferences
                 SharedPreferences getPrefs = PreferenceManager
                         .getDefaultSharedPreferences(getBaseContext());
-                //  Create a new boolean and preference and set it to true
                 boolean isFirstStart = getPrefs.getBoolean("firstStart", true);
-                //  If the activity has never started before...
                 if (isFirstStart) {
-                    //  Launch app intro
                     Intent i = new Intent(MainActivity.this, IntroActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                     startActivity(i);
-                    //  Make a new preferences editor
                     SharedPreferences.Editor editor = getPrefs.edit();
-                    //  Edit preference to make it false because we don't want this to run again
                     editor.putBoolean("firstStart", false);
-                    //  Apply changes
                     editor.apply();
                 }
             }
@@ -173,28 +258,35 @@ public class MainActivity extends AppCompatActivity
         // Start the thread
         t.start();
 
-        Thread AskPermissions = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext,Manifest.permission_group.LOCATION)){
-                    //If the user has denied the permission previously your code will come to this block
-                    //Here you can explain why you need this permission
-                    //Explain here why you need this permission
-                }
+//        new AsyncTask<Void, Void, Void>() {
+//            @Override
+//            protected Void doInBackground(Void... params) {
+//                SharedPreferences getPrefs = PreferenceManager
+//                        .getDefaultSharedPreferences(getBaseContext());
+//                boolean isFirstStartSignedIn = getPrefs.getBoolean("USERSIGNEDIN", true);
+//                if (isFirstStartSignedIn) {
+//                    Intent i = new Intent(MainActivity.this, FirebaseSignInActivity.class);
+//                    startActivityForResult(intent, REQUEST_AUTHENTICATION_CODE);
+//                    //  Make a new preferences editor
+//                    SharedPreferences.Editor editor = getPrefs.edit();
+//                    editor.putBoolean("USERSIGNEDIN", false);
+//                    editor.apply();
+//                }
+//                return null;
+//            }
+//        }.execute();
 
-                //And finally ask for the permission
-                ActivityCompat.requestPermissions((Activity) mContext,PermissionsList, PERMISSION_CODE);
-            }
-        });
-        AskPermissions.start();
-        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+
     }
 
     @Override
     public void onClick(View view, int position) {
         Intent intent = new Intent(mContext, ViewActivity.class);
         intent.putExtra("ID", (int) view.getTag());
-        startActivity(intent);
+        Bundle bundle = ActivityOptions
+                .makeSceneTransitionAnimation(this)
+                .toBundle();
+        startActivity(intent, bundle);
     }
 
 
@@ -227,8 +319,7 @@ public class MainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id==R.id.action_settings)
-        {
+        if (id == R.id.action_settings) {
             Intent intent = new Intent(this, Settings.class);
             startActivity(intent);
         }
@@ -242,25 +333,25 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         Intent intent;
 
-        if (id == R.id.nav_gallery) {
-            // Handle the camera action
-        } else if (id == R.id.nav_calender) {
+        if (id == R.id.nav_calender) {
             intent = new Intent(this, CalenderActivity.class);
             startActivity(intent);
-
         } else if (id == R.id.nav_settings) {
             intent = new Intent(this, Settings.class);
             startActivity(intent);
-
-        } else if (id == R.id.nav_share) {
-            //TODO Send the Link to APP from here
-            intent = new Intent(this, SignInActivity.class);
-            startActivity(intent);
+        } else if (id == R.id.nav_person) {
+            intent = new Intent(this, FirebaseSignInActivity.class);
+            startActivityForResult(intent, REQUEST_AUTHENTICATION_CODE);
         } else if (id == R.id.nav_help) {
-            intent = new Intent(this,IntroActivity.class);
+            intent = new Intent(this, IntroActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_about) {
             intent = new Intent(this, AboutMeActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_share) {
+            intent = new Intent(Intent.ACTION_SEND);
+            intent.putExtra(Intent.EXTRA_TEXT, "Request dev to send a copy of App :) :) :)");
+            intent.setType("text/plain");
             startActivity(intent);
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -271,8 +362,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
         Uri mDataUrl = JournalContentProvider.ContentProviderCreator.JOURNAL;
-        // Returns a new CursorLoader
-//        Log.e(LOG_TAG,"CALLED");
         return new CursorLoader(
                 this,   // Parent activity context
                 mDataUrl,        // Table to query
@@ -285,8 +374,19 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        data.moveToFirst();
-        mJournalAdapter.swapCursor(data);
+        if (data.getCount() == 0) {
+            emptyTextView.setVisibility(View.VISIBLE);
+            emptyImageView.setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.GONE);
+            mJournalAdapter.swapCursor(null);
+        } else {
+            data.moveToFirst();
+            emptyTextView.setVisibility(View.GONE);
+            emptyImageView.setVisibility(View.GONE);
+            mRecyclerView.setVisibility(View.VISIBLE);
+            mJournalAdapter.swapCursor(data);
+        }
+
     }
 
     @Override
@@ -294,18 +394,30 @@ public class MainActivity extends AppCompatActivity
         mJournalAdapter.swapCursor(null);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_AUTHENTICATION_CODE) {
+            if (resultCode == RESULT_OK)
+                Toast.makeText(this, "Congrats! Now you can use all features of the Application", Toast.LENGTH_SHORT).show();
+            else if (resultCode == RESULT_CANCELED)
+                Toast.makeText(this, "You have to Sign-in if you want to use all features of the Application", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        //Checking the request code of our request
-        if(requestCode != PERMISSION_CODE) {
-            //Displaying another toast if permission is not granted
+        if (requestCode != PERMISSION_CODE) {
             Toast.makeText(this, "You have Denied Some Permissions. Please review from settings.", Toast.LENGTH_LONG).show();
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
-
-
 }
 
 

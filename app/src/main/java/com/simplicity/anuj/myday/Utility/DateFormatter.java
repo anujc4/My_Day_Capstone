@@ -18,7 +18,7 @@ public class DateFormatter extends SimpleDateFormat {
     }
 
     public String getDate() {
-        mSimpleDateFormat = new SimpleDateFormat("dd-MMMM-yyyy");
+        mSimpleDateFormat = new SimpleDateFormat("d-MMMM-yyyy");
         return mSimpleDateFormat.format(mCalendar.getTime());
     }
 
@@ -30,6 +30,37 @@ public class DateFormatter extends SimpleDateFormat {
     public String getDay() {
         mSimpleDateFormat = new SimpleDateFormat("EEEE");
         return mSimpleDateFormat.format(mCalendar.getTime());
+    }
+
+    public String getMonth(int mon) {
+        switch (mon) {
+            case 0:
+                return "January";
+            case 1:
+                return "February";
+            case 2:
+                return "March";
+            case 3:
+                return "April";
+            case 4:
+                return "May";
+            case 5:
+                return "June";
+            case 6:
+                return "July";
+            case 7:
+                return "August";
+            case 8:
+                return "September";
+            case 9:
+                return "October";
+            case 10:
+                return "November";
+            case 11:
+                return "December";
+            default:
+                return null;
+        }
     }
 
     public int getYear() {

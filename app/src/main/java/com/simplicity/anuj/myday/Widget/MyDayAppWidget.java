@@ -27,17 +27,6 @@ public class MyDayAppWidget extends AppWidgetProvider {
     private static HandlerThread sWorkerThread;
     private static Handler sWorkerQueue;
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId) {
-
-        // Construct the RemoteViews object
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.my_day_app_widget);
-//        views.setTextViewText(R.id.appwidget_text, widgetText);
-//        views.setTextViewText(R.id.widget_list_day_of_month,"301");
-        // Instruct the widget manager to update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, views);
-    }
-
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
@@ -45,11 +34,7 @@ public class MyDayAppWidget extends AppWidgetProvider {
             Intent intent = new Intent(context, JournalRemoteViewsService.class);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
-
-            //TODO Make this layout similar to the main activity layout.....
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.my_day_app_widget);
-
-            //TODO Set the id to list view
             views.setRemoteAdapter(R.id.widget_list_view, intent);
             Intent onClickIntent = new Intent(context, ViewActivity.class);
             onClickIntent.setAction(MyDayAppWidget.CLICK_ACTION);
@@ -57,7 +42,6 @@ public class MyDayAppWidget extends AppWidgetProvider {
             onClickIntent.setData(Uri.parse(onClickIntent.toUri(Intent.URI_INTENT_SCHEME)));
             final PendingIntent onClickPendingIntent = PendingIntent.getBroadcast(context, 0,
                     onClickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            //TODO Set the id to list view
             views.setPendingIntentTemplate(R.id.widget_list_view, onClickPendingIntent);
             appWidgetManager.updateAppWidget(appWidgetId, views);
         }
@@ -94,11 +78,6 @@ public class MyDayAppWidget extends AppWidgetProvider {
         }
     }
 
-    @Override
-    public void onDisabled(Context context) {
-        // Enter relevant functionality for when the last widget is disabled
-    }
-
     private static class JournalDataProviderObserver extends ContentObserver {
         private AppWidgetManager mAppWidgetManager;
         private ComponentName mComponentName;
@@ -116,7 +95,6 @@ public class MyDayAppWidget extends AppWidgetProvider {
             // In response, the factory's onDataSetChanged() will be called which will requery the
             // cursor for the new data.
             mAppWidgetManager.notifyAppWidgetViewDataChanged(
-                    //TODO Change to list view ID
                     mAppWidgetManager.getAppWidgetIds(mComponentName), R.id.widget_list_view);
         }
     }

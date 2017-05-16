@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".Activity.AddEntryActivity"
-    tools:showIn="@layout/activity_add_entry">
+    tools:showIn="@layout/activity_add_entry"
+    android:id="@+id/frame_layout_add_entry">
 
     <FrameLayout
         android:id="@+id/frame_layout_view_location_map"
@@ -58,19 +59,19 @@
                     android:layout_marginEnd="16dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
-                    android:text="DAY"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    fontPath="fonts/adlanta.ttf"
+                    android:textStyle="bold"
                     android:textSize="30sp" />
-
 
                 <TextView
                     android:id="@+id/CurrentTimeTextView"
                     android:layout_width="wrap_content"
+                    fontPath="fonts/adlanta_light.ttf"
                     android:layout_height="wrap_content"
                     android:layout_alignStart="@+id/CurrentDayTextView"
                     android:layout_below="@+id/CurrentDayTextView"
                     android:layout_marginTop="3dp"
-                    android:text="TIME"
+                    android:fontFamily="fonts/adlanta_light.ttf"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
@@ -82,7 +83,8 @@
                     android:layout_marginTop="3dp"
                     android:backgroundTint="@color/Transparent"
                     android:hint="@string/title"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    fontPath="fonts/adlanta.ttf" />
 
                 <TextView
                     android:id="@+id/HintTextView"
@@ -91,7 +93,8 @@
                     android:layout_alignStart="@+id/TitleEditText"
                     android:layout_below="@+id/TitleEditText"
                     android:layout_marginTop="3dp"
-                    android:text="@string/enter_your_thoughts_below" />
+                    android:text="@string/enter_your_thoughts_below"
+                    fontPath="fonts/adlanta.ttf" />
 
                 <View
                     android:id="@+id/view2"
@@ -109,17 +112,20 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_below="@+id/view2"
+                    fontPath="fonts/adlanta_light.ttf"
                     android:layout_marginEnd="16dp"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="3dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@color/Transparent"
                     android:backgroundTint="@color/Transparent"
+                    android:fontFamily="fonts/adlanta_light.ttf"
                     android:hint="@string/enter_here"
                     android:minHeight="50dp" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/add_entry_images_recycler_view"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_below="@+id/editText"
                     android:layout_marginEnd="16dp"
                     android:layout_marginStart="16dp"
@@ -130,56 +136,83 @@
                     android:overScrollMode="never"
                     app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
 
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/add_entry_videos_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@+id/add_entry_images_recycler_view"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="3dp"
+                    android:elevation="4dp"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never"
+                    app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
+
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_below="@+id/add_entry_images_recycler_view" />
-
             </RelativeLayout>
         </ScrollView>
 
         <RelativeLayout
             android:id="@+id/relativeLayoutBAR"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
-            android:background="@color/AppIntro2">
+            android:background="#424242">
+
 
             <ImageButton
                 android:id="@+id/add_image_from_camera"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_alignParentStart="true"
-                android:layout_margin="15dp"
-                android:background="@drawable/ic_camera_entry"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/ic_photo_camera_white_24dp"
                 android:contentDescription="@string/take_photo" />
 
-            <ImageButton
-                android:id="@+id/switch_geo_location_button"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_margin="15dp"
-                android:layout_toEndOf="@+id/add_image_from_camera"
-                android:background="@drawable/ic_action_name"
-                android:contentDescription="@string/turn_geotag_on_off" />
 
             <ImageButton
                 android:id="@+id/add_video_from_camera"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:layout_margin="15dp"
-                android:layout_toEndOf="@id/switch_geo_location_button"
-                android:background="@drawable/ic_action_video"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_toEndOf="@id/add_image_from_camera"
+                android:background="@drawable/ic_videocam_white_24dp"
                 android:contentDescription="@string/recoed_video" />
+
+            <ImageButton
+                android:id="@+id/switch_geo_location_button"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_toEndOf="@+id/add_video_from_camera"
+                android:background="@drawable/ic_my_location_white_24dp"
+                android:contentDescription="@string/turn_geotag_on_off" />
+
 
             <ImageButton
                 android:id="@+id/view_weather_data"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:layout_margin="15dp"
-                android:layout_toEndOf="@+id/add_video_from_camera"
-                android:background="@drawable/ic_action_weather"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_toEndOf="@+id/switch_geo_location_button"
+                android:background="@drawable/ic_cloud_white_24dp"
                 android:contentDescription="@string/weather_data" />
 
         </RelativeLayout>
@@ -190,21 +223,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:elevation="4dp"
-        android:visibility="gone"
-        android:background="#FFFFFF"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
 
-        <ImageButton
-            android:id="@+id/close_weather"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:layout_marginEnd="@dimen/close_button_margin"
-            android:layout_marginTop="@dimen/close_button_margin"
-            android:background="@drawable/ic_cancel_black_24dp"
-            android:contentDescription="@string/cancel"
-            android:elevation="8dp"
-            android:padding="@dimen/cancel_button_padding" />
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/Transparent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/clouds_background" />
 
     </FrameLayout>
 

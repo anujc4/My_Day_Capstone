@@ -16,7 +16,10 @@ public class AboutMeActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        //TODO Make the About Me Activity
+        //Currently there is no behaviour on this Screen. Thus every thing
+        //is handled by the XML layout files
+
+        //TODO make the behaviour of this activity
     }
 
 }
