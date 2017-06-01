@@ -12,15 +12,17 @@ public class Utils {
     public static final int TIME_CREATED_INDEX = 4;
     public static final int DATE_MODIFIED_INDEX = 5;
     public static final int TIME_MODIFIED_INDEX = 6;
-    public static final int HAS_LOCAION_INDEX = 7;
-    public static final int HAS_WEATHER_INDEX = 8;
-    public static final int THUMB_PATH_INDEX = 9;
+    public static final int TIME_STAMP_INDEX = 7;
+    public static final int HAS_LOCAION_INDEX = 8;
+    public static final int HAS_WEATHER_INDEX = 9;
 
-    public static final int _ID_MULTIMEDIA_INDEX = 0;
-    public static final int _ID_MAIN_INDEX = 1;
+    public static final int _ID_IMAGE_INDEX = 0;
+    public static final int _ID_MAIN_IMAGE_INDEX = 1;
     public static final int IMAGE_PATH_INDEX = 2;
-    public static final int VIDEO_PATH_INDEX = 3;
-    public static final int AUDIO_PATH_INDEX = 4;
+
+    public static final int _ID_VIDEO_INDEX = 0;
+    public static final int _ID_MAIN_VIDEO_INDEX = 1;
+    public static final int VIDEO_PATH_INDEX = 2;
 
     public static final int _ID_LOCATION_INDEX = 0;
     public static final int _ID_MAIN_LOCATION_INDEX = 1;
@@ -49,14 +51,18 @@ public class Utils {
     public static final String TIME_CREATED_JOURNAL = "time_created";
     public static final String DATE_MODIFIED_JOURNAL = "date_modified";
     public static final String TIME_MODIFIED_JOURNAL = "time_modified";
+    public static final String TIME_STAMP_JOURNAL = "time_stamp";
     public static final String HAS_LOCATION_JOURNAL = "has_location";
     public static final String HAS_WEATHER_JOURNAL = "has_weather";
-    public static final String THUMB_PATH_JOURNAL = "thumb_path";
-    public static final String _ID_MULTIMEDIA = "_id";
-    public static final String _ID_MAIN_MULTIMEDIA = "_id_main";
-    public static final String IMAGE_PATH_MULTIMEDIA = "image_path";
-    public static final String VIDEO_PATH_MULTIMEDIA = "video_path";
-    public static final String AUDIO_PATH_MULTIMEDIA = "audio_path";
+
+    public static final String _ID_IMAGE = "_id";
+    public static final String _ID_MAIN_IMAGE = "_id_main";
+    public static final String IMAGE_PATH = "image_path";
+
+    public static final String _ID_VIDEO = "_id";
+    public static final String _ID_MAIN_VIDEO = "_id_main";
+    public static final String VIDEO_PATH = "video_path";
+
     public static final String _ID_LOCATION = "_id";
     public static final String _ID_MAIN_LOCATION = "_id_main";
     public static final String LATITUDE_LOCATION = "latitude";
@@ -73,11 +79,6 @@ public class Utils {
     public static final String MAIN_PRESSURE_WEATHER = "main_pressure";
     public static final String CLOUDS_WEATHER = "clouds";
     public static final String NAME_WEATHER = "name";
-
-//    Typeface font_south_gardens = Typeface.createFromAsset(getAssets(),  "fonts/south_gardens.ttf");
-//    Typeface font_adlanta = Typeface.createFromAsset(getAssets(),  "fonts/adlanta.ttf");
-//    Typeface font_adlanta_light = Typeface.createFromAsset(getAssets(),  "fonts/adlanta_light.ttf");
-
 
     public Utils() {
     }

@@ -2,14 +2,16 @@ package com.simplicity.anuj.myday.Data;
 
 import net.simonvt.schematic.annotation.AutoIncrement;
 import net.simonvt.schematic.annotation.DataType;
+import net.simonvt.schematic.annotation.DefaultValue;
 import net.simonvt.schematic.annotation.NotNull;
 import net.simonvt.schematic.annotation.PrimaryKey;
 import net.simonvt.schematic.annotation.References;
 
 /**
- * Created by anuj on 10/8/2016.
+ * Created by anujc on 26-05-2017.
  */
-public interface MultimediaContract {
+
+public interface ImageContract {
     @DataType(DataType.Type.INTEGER)
     @PrimaryKey
     @AutoIncrement
@@ -21,11 +23,6 @@ public interface MultimediaContract {
     String _ID_MAIN = "_id_main";
 
     @DataType(DataType.Type.TEXT)
+    @DefaultValue("null")
     String IMAGE_PATH = "image_path";
-
-    @DataType(DataType.Type.TEXT)
-    String VIDEO_PATH = "video_path";
-
-    @DataType(DataType.Type.TEXT)
-    String AUDIO_PATH = "audio_path";
 }

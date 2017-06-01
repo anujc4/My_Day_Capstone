@@ -2,11 +2,12 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator_layout_activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".Activity.MainActivity"
-    android:id="@+id/coordinator_layout_activity_main">
+    tools:context=".Activity.MainActivity">
+
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
@@ -21,17 +22,45 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:title="My Day"
             app:titleEnabled="true">
 
-            <ImageView
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/side_nav_bar" />
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/collapsing_toolbar_scrim"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/side_nav_bar" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/time_line_placeholder"
+                        fontPath="fonts/south_gardens.ttf"
+                        android:textSize="20sp"
+                        android:layout_marginTop="8dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="TIMELINE" />
+
+                    <com.db.chart.view.LineChartView
+                        android:id="@+id/line_chart"
+                        android:layout_width="match_parent"
+                        android:layout_height="150dp" />
+                </LinearLayout>
+
+            </FrameLayout>
 
             <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
+                android:id="@+id/toolbar_activity_main"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
@@ -39,6 +68,15 @@
 
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:overScrollMode="never"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:context=".Activity.MainActivity" />
+
 
     <include layout="@layout/content_main" />
 
@@ -48,7 +86,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-
-        android:src="@drawable/ic_add_entry"/>
+        android:src="@drawable/ic_add_entry"
+        app:layout_behavior="com.simplicity.anuj.myday.FAB" />
 
 </android.support.design.widget.CoordinatorLayout>

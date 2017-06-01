@@ -6,34 +6,7 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".Activity.AddEntryActivity"
-    tools:showIn="@layout/activity_add_entry"
-    android:id="@+id/frame_layout_add_entry">
-
-    <FrameLayout
-        android:id="@+id/frame_layout_view_location_map"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:elevation="4dp"
-        android:orientation="vertical">
-
-        <fragment
-            android:id="@+id/fragment_map_location"
-            android:name="com.google.android.gms.maps.MapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <ImageButton
-            android:id="@+id/close_map"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:layout_marginEnd="@dimen/close_button_margin"
-            android:layout_marginTop="@dimen/close_button_margin"
-            android:background="@drawable/ic_cancel_black_24dp"
-            android:contentDescription="@string/cancel"
-            android:elevation="8dp"
-            android:padding="@dimen/cancel_button_padding" />
-    </FrameLayout>
+    tools:showIn="@layout/activity_add_entry">
 
 
     <RelativeLayout
@@ -41,7 +14,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="top">
 
-        <ScrollView
+        <android.support.v4.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -81,7 +54,6 @@
                     android:layout_alignStart="@+id/CurrentTimeTextView"
                     android:layout_below="@+id/CurrentTimeTextView"
                     android:layout_marginTop="3dp"
-                    android:backgroundTint="@color/Transparent"
                     android:hint="@string/title"
                     android:textStyle="bold"
                     fontPath="fonts/adlanta.ttf" />
@@ -104,57 +76,52 @@
                     android:layout_marginEnd="2dp"
                     android:layout_marginStart="2dp"
                     android:layout_marginTop="3dp"
-                    android:background="@color/Black" />
-
-                <EditText
-                    android:id="@+id/editText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_below="@+id/view2"
-                    fontPath="fonts/adlanta_light.ttf"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="6dp"
-                    android:background="@color/Transparent"
-                    android:backgroundTint="@color/Transparent"
-                    android:fontFamily="fonts/adlanta_light.ttf"
-                    android:hint="@string/enter_here"
-                    android:minHeight="50dp" />
+                    android:background="@color/divider" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/add_entry_images_recycler_view"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_below="@+id/editText"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginStart="16dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/view2"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginTop="3dp"
-                    android:elevation="4dp"
                     android:longClickable="true"
-                    android:nestedScrollingEnabled="false"
                     android:overScrollMode="never"
                     app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/add_entry_videos_recycler_view"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_below="@+id/add_entry_images_recycler_view"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginTop="3dp"
-                    android:elevation="4dp"
-                    android:nestedScrollingEnabled="false"
                     android:overScrollMode="never"
                     app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
 
-                <View
+                <EditText
+                    android:id="@+id/editText"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_below="@+id/add_entry_images_recycler_view" />
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/add_entry_videos_recycler_view"
+                    fontPath="fonts/adlanta_light.ttf"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@color/Transparent"
+                    android:fontFamily="fonts/adlanta_light.ttf"
+                    android:hint="@string/enter_here"
+                    android:minHeight="50dp" />
+
+                <!--<View-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="50dp"-->
+                <!--android:layout_below="@+id/add_entry_images_recycler_view" />-->
             </RelativeLayout>
-        </ScrollView>
+        </android.support.v4.widget.NestedScrollView>
 
         <RelativeLayout
             android:id="@+id/relativeLayoutBAR"
@@ -162,7 +129,7 @@
             android:layout_height="50dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
-            android:background="#424242">
+            android:background="@color/secondary_text">
 
 
             <ImageButton
@@ -219,20 +186,44 @@
     </RelativeLayout>
 
     <FrameLayout
-        android:id="@+id/frame_layout_view_weather_data"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:elevation="4dp"
-        android:orientation="vertical"
+        android:id="@+id/frame_layout_view_location_container"
         android:visibility="gone">
 
-        <ImageView
+        <FrameLayout
+            android:id="@+id/frame_layout_view_location_map"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/Transparent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/clouds_background" />
+            android:layout_height="match_parent">
 
+            <fragment
+                android:id="@+id/fragment_map_location"
+                android:name="com.google.android.gms.maps.MapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
     </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/frame_layout_view_weather_container"
+        android:visibility="gone"
+        android:background="@color/Transparent">
+
+        <FrameLayout
+            android:id="@+id/frame_layout_view_weather_data"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/Transparent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/clouds_background" />
+        </FrameLayout>
+    </FrameLayout>
+
 
 </FrameLayout>

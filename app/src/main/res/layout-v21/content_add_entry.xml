@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".Activity.AddEntryActivity"
+    tools:showIn="@layout/activity_add_entry">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:layout_marginTop="1dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@+id/relativeLayoutBAR">
+
+        <android.support.v4.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:transitionName="@string/transition_string">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="top">
+
+                <TextView
+                    android:id="@+id/CurrentDayTextView"
+                    fontPath="fonts/adlanta.ttf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:textSize="30sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/CurrentTimeTextView"
+                    fontPath="fonts/adlanta_light.ttf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/CurrentDayTextView"
+                    android:layout_below="@+id/CurrentDayTextView"
+                    android:layout_marginTop="3dp"
+                    android:fontFamily="fonts/adlanta_light.ttf"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <EditText
+                    android:id="@+id/TitleEditText"
+                    fontPath="fonts/adlanta.ttf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/CurrentTimeTextView"
+                    android:layout_below="@+id/CurrentTimeTextView"
+                    android:backgroundTint="@color/Transparent"
+                    android:hint="@string/title"
+                    android:paddingBottom="2dp"
+                    android:paddingTop="2dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/HintTextView"
+                    fontPath="fonts/adlanta.ttf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/TitleEditText"
+                    android:layout_below="@+id/TitleEditText"
+                    android:layout_marginTop="3dp"
+                    android:text="@string/enter_your_thoughts_below" />
+
+                <View
+                    android:id="@+id/view2"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_below="@+id/HintTextView"
+                    android:layout_marginEnd="2dp"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginTop="3dp"
+                    android:background="@color/divider" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/add_entry_images_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/view2"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never"
+                    app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/add_entry_videos_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/add_entry_images_recycler_view"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never"
+                    app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
+
+                <EditText
+                    android:id="@+id/editText"
+                    fontPath="fonts/adlanta_light.ttf"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/add_entry_videos_recycler_view"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/Transparent"
+                    android:backgroundTint="@color/Transparent"
+                    android:fontFamily="fonts/adlanta_light.ttf"
+                    android:gravity="top|start"
+                    android:hint="@string/enter_here"
+                    android:paddingBottom="50dp"
+                    android:minHeight="150dp" />
+            </RelativeLayout>
+        </android.support.v4.widget.NestedScrollView>
+
+        <FrameLayout
+            android:id="@+id/frame_layout_view_weather_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/Transparent"
+            android:visibility="gone">
+
+            <FrameLayout
+                android:id="@+id/frame_layout_view_weather_data"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/Transparent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/clouds_background" />
+            </FrameLayout>
+
+        </FrameLayout>
+
+
+        <FrameLayout
+            android:id="@+id/frame_layout_view_location_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/Transparent"
+            android:visibility="gone">
+
+            <FrameLayout
+                android:id="@+id/frame_layout_view_location_map"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <fragment
+                    android:id="@+id/fragment_map_location"
+                    android:name="com.google.android.gms.maps.MapFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </FrameLayout>
+        </FrameLayout>
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/relativeLayoutBAR"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:background="@color/secondary_text">
+
+
+        <ImageButton
+            android:id="@+id/add_image_from_camera"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/ic_photo_camera_white_24dp"
+            android:contentDescription="@string/take_photo"
+            android:padding="8dp"
+            android:scaleType="fitCenter" />
+
+
+        <ImageButton
+            android:id="@+id/add_video_from_camera"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="10dp"
+            android:layout_toEndOf="@id/add_image_from_camera"
+            android:background="@drawable/ic_videocam_white_24dp"
+            android:contentDescription="@string/recoed_video"
+            android:padding="8dp"
+            android:scaleType="fitCenter" />
+
+        <ImageButton
+            android:id="@+id/switch_geo_location_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="10dp"
+            android:layout_toEndOf="@+id/add_video_from_camera"
+            android:background="@drawable/ic_my_location_white_24dp"
+            android:contentDescription="@string/turn_geotag_on_off"
+            android:padding="8dp"
+            android:scaleType="fitCenter" />
+
+
+        <ImageButton
+            android:id="@+id/view_weather_data"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="10dp"
+            android:layout_toEndOf="@+id/switch_geo_location_button"
+            android:background="@drawable/ic_cloud_white_24dp"
+            android:contentDescription="@string/weather_data"
+            android:padding="8dp"
+            android:scaleType="fitCenter" />
+
+    </RelativeLayout>
+</RelativeLayout>

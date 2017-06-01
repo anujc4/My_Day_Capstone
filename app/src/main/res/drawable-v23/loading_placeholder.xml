@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:gravity="fill"
+        android:height="400px"
+        android:width="500px">
+        <shape xmlns:android="http://schemas.android.com/apk/res/android"
+            android:shape="rectangle">
+            <gradient
+                android:angle="0"
+                android:centerColor="#FFEB3B"
+                android:endColor="#FFEB3B"
+                android:startColor="#FFEB3B"
+                android:type="linear" />
+        </shape>
+    </item>
+
+    <item
+        android:width="100px"
+        android:height="100px"
+        android:drawable="@drawable/ic_hourglass_empty_yellow_50dp"
+        android:gravity="center" />
+</layer-list>

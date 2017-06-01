@@ -33,6 +33,10 @@ public interface JournalContract {
     @DataType(DataType.Type.TEXT)@NotNull
     String TIME_MODIFIED = "time_modified";
 
+    @DataType(DataType.Type.TEXT)
+    @NotNull
+    String TIME_STAMP = "time_stamp";
+
     @DataType(DataType.Type.INTEGER)
     @NotNull
     @DefaultValue("-1")
@@ -42,8 +46,4 @@ public interface JournalContract {
     @NotNull
     @DefaultValue("-1")
     String HAS_WEATHER = "has_weather";
-
-    @DataType(DataType.Type.TEXT)
-    @DefaultValue("null")
-    String IMAGE_PATH = "thumb_path";
 }

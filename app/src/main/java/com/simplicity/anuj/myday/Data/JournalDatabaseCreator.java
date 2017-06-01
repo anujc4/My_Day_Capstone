@@ -1,6 +1,7 @@
 package com.simplicity.anuj.myday.Data;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -9,15 +10,20 @@ import net.simonvt.schematic.annotation.IfNotExists;
 import net.simonvt.schematic.annotation.OnCreate;
 import net.simonvt.schematic.annotation.OnUpgrade;
 import net.simonvt.schematic.annotation.Table;
+import net.simonvt.schematic.annotation.TableEndpoint;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by anuj on 9/4/2016.
  */
 @Database(version = JournalDatabaseCreator.VERSION)
 public class JournalDatabaseCreator {
-    static final int VERSION = 6;
-    @Table(MultimediaContract.class)
-    static final String MULTIMEDIA = "multimedia";
+    static final int VERSION = 8;
+    @Table(ImageContract.class)
+    static final String IMAGE = "image";
+    @Table(VideoContract.class)
+    static final String VIDEO = "video";
     @Table(LocationContract.class)
     static final String LOCATION = "location";
     @Table(WeatherContract.class)
@@ -25,7 +31,14 @@ public class JournalDatabaseCreator {
 
     @OnCreate
     public static void onCreate(Context context, SQLiteDatabase db) {
-        Log.e("SQL", db.getPath() + "\n" + db.toString());
+//        Log.e("SQL", db.getPath() + "\n" + db.toString());
+
+        //Store path to database
+        SharedPreferences fileDirPreferences = context.getSharedPreferences("com.simplicity.anuj.myday.FileDirectory", MODE_PRIVATE);
+        SharedPreferences.Editor editor = fileDirPreferences.edit();
+        editor.putString("database_path", db.getPath());
+        editor.apply();
+
 //        context.deleteDatabase("journalDatabaseCreator.db");
     }
 

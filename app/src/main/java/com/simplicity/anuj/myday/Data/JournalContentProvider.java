@@ -28,13 +28,22 @@ public final class JournalContentProvider {
     }
 
 
-    @TableEndpoint(table = JournalDatabaseCreator.MULTIMEDIA)
-    public static class MultimediaContentProviderCreator {
+    @TableEndpoint(table = JournalDatabaseCreator.IMAGE)
+    public static class ImageContentProviderCreator {
         @ContentUri(
-                path = JournalDatabaseCreator.MULTIMEDIA,
+                path = JournalDatabaseCreator.IMAGE,
                 type = "vnd.android.cursor.dir/multimedia",
-                defaultSort = MultimediaContract._ID + " ASC")
-        public static final Uri MULTIMEDIA = Uri.parse("content://" + AUTHORITY + "/multimedia");
+                defaultSort = ImageContract._ID + " ASC")
+        public static final Uri IMAGE = Uri.parse("content://" + AUTHORITY + "/image");
+    }
+
+    @TableEndpoint(table = JournalDatabaseCreator.VIDEO)
+    public static class VideoContentProviderCreator {
+        @ContentUri(
+                path = JournalDatabaseCreator.VIDEO,
+                type = "vnd.android.cursor.dir/multimedia",
+                defaultSort = VideoContract._ID + " ASC")
+        public static final Uri VIDEO = Uri.parse("content://" + AUTHORITY + "/video");
     }
 
     @TableEndpoint(table = JournalDatabaseCreator.LOCATION)

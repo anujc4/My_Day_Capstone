@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginTop="?attr/actionBarSize"
+    android:layout_marginBottom="?attr/actionBarSize">
+
+    <com.db.chart.view.LineChartView
+        android:id="@+id/line_chart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp" />
+
+    <!--<LinearLayout-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:id="@+id/graph_card_view">-->
+    <!--&lt;!&ndash;<TextView&ndash;&gt;-->
+    <!--&lt;!&ndash;fontPath="fonts/south_gardens.ttf"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:layout_marginTop="8dp"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:gravity="center"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:maxLines="1"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:text="@string/your_activity"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:textColor="@color/white"&ndash;&gt;-->
+    <!--&lt;!&ndash;android:textSize="20sp" />&ndash;&gt;-->
+
+    <!--<com.db.chart.view.LineChartView-->
+    <!--android:id="@+id/line_chart"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="150dp"-->
+    <!--android:layout_marginBottom="15dp"-->
+    <!--android:layout_marginLeft="8dp"-->
+    <!--android:layout_marginRight="8dp" />-->
+    <!--</LinearLayout>-->
+
+</LinearLayout>

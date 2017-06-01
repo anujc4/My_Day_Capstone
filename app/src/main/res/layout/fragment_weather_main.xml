@@ -3,78 +3,83 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:gravity="center_vertical"
-        android:layout_gravity="left"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:gravity="center_vertical"
         android:orientation="vertical"
         android:padding="16dp">
 
         <!-- Header: Day, Date -->
-    <TextView
-        android:fontFamily="sans-serif-condensed"
-        android:id="@+id/weather_fragment_name_textview"
-        android:text="CITY"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:textColor="@color/black"
-        android:textSize="36sp" />
+        <TextView
+            android:id="@+id/weather_fragment_name_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
+            android:text="CITY"
+            android:textColor="@color/primary_text"
+            android:textSize="36sp" />
 
         <TextView
-            android:fontFamily="sans-serif-condensed"
             android:id="@+id/weather_fragment_day_and_date_textview"
-            android:text="DAY DETAIL"
-            android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:textColor="@color/black"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
+            android:text="DAY DETAIL"
+            android:textColor="@color/primary_text"
             android:textSize="24sp" />
 
         <TextView
-            android:fontFamily="sans-serif-condensed"
             android:id="@+id/weather_fragment_main_textview"
-            android:text="Description"
-            android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:textColor="@color/grey_700"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
+            android:text="Description"
+            android:textColor="@color/secondary_text"
             android:textSize="16sp" />
 
         <!-- Main content: high, low, art, weather state -->
         <LinearLayout
-            android:gravity="center_horizontal"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-        android:layout_width="match_parent"
+            android:gravity="center_horizontal"
             android:orientation="horizontal">
 
             <LinearLayout
-                android:gravity="start"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
+                android:layout_weight="65"
+                android:gravity="start"
                 android:orientation="vertical">
 
                 <TextView
-                    android:fontFamily="sans-serif-light"
                     android:id="@+id/weather_fragment_high_textview"
-                    android:text="HIGH"
-                    android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:textSize="90sp" />
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/primary_text"
+                    android:text="HIGH"
+                    android:textSize="70sp" />
 
                 <TextView
                     android:id="@+id/weather_fragment_low_textview"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_height="wrap_content"
-                    android:text="LOW"
                     android:layout_width="wrap_content"
-                    android:textColor="@color/grey_700"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:maxLines="1"
+                    android:text="LOW"
+                    android:textColor="@color/secondary_text"
                     android:textSize="40sp" />
             </LinearLayout>
 
             <LinearLayout
-                android:gravity="center_horizontal"
-                android:layout_gravity="center"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="35"
+                android:gravity="center_horizontal"
                 android:orientation="vertical">
 
                 <ImageView
@@ -84,44 +89,47 @@
 
                 <TextView
                     android:id="@+id/weather_fragment_forecast_textview"
-                    android:text="FORECAST"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="FORECAST"
+                    android:gravity="center"
                     android:textAppearance="?android:textAppearanceLarge"
-                    android:textColor="@color/grey_700" />
+                    android:textColor="@color/secondary_text" />
             </LinearLayout>
         </LinearLayout>
 
         <!-- Humidity, wind, pressure -->
         <LinearLayout
-        android:layout_height="match_parent"
-            android:layout_marginRight="0dp"
-            android:layout_marginTop="16dp"
             android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="16dp"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/weather_fragment_humidity_textview"
-                android:layout_height="wrap_content"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="HUMIDITY"
+                android:textColor="@color/primary_text"
                 android:textAppearance="?android:textAppearanceLarge" />
 
             <TextView
                 android:id="@+id/weather_fragment_pressure_textview"
-                android:layout_height="wrap_content"
-                android:text="PRESSURE"
-                android:layout_marginTop="4dp"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/primary_text"
+                android:text="PRESSURE"
                 android:textAppearance="?android:textAppearanceLarge" />
 
             <TextView
                 android:id="@+id/weather_fragment_wind_textview"
-                android:layout_height="wrap_content"
-                android:text="WIND"
-                android:layout_marginTop="4dp"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/primary_text"
+                android:text="WIND"
                 android:textAppearance="?android:textAppearanceLarge" />
-
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

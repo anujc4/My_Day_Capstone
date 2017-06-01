@@ -4,40 +4,37 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
+import android.support.v4.content.FileProvider;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.transition.Slide;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -49,6 +46,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.simplicity.anuj.myday.Adapter.ViewEntryImagesAdapter;
 import com.simplicity.anuj.myday.Adapter.ViewEntryVideosAdapter;
 import com.simplicity.anuj.myday.Data.JournalContentProvider;
+import com.simplicity.anuj.myday.MultimediaUtility.FileCreator;
 import com.simplicity.anuj.myday.R;
 import com.simplicity.anuj.myday.Utility.DateFormatter;
 import com.simplicity.anuj.myday.Utility.Utils;
@@ -60,42 +58,42 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static android.support.v4.content.FileProvider.getUriForFile;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 public class ViewActivity extends AppCompatActivity {
 
     private static final int REQUEST_TAKE_PHOTO = 1001;
+    private static final int REQUEST_TAKE_VIDEO = 2001;
     private static final int LOADER_ID_FOR_ENTRY_DETAILS = 201;
     private static final int LOADER_ID_FOR_IMAGE_DETAILS = 202;
     private static final int LOADER_ID_FOR_VIDEO_DETAILS = 203;
     static boolean textChanged = false;
     private static int _ID;
     private final String LOG_TAG = ViewActivity.class.getSimpleName();
-    Context mContext;
-    TextView CurrentDayTextView;
-    TextView CurrentDateTextView;
-    EditText editTextAddEntry;
-    EditText editTitleAddEntry;
-    ImageButton AddImagefromCameraButton;
-    ImageButton GeotagButton;
-    ImageButton WeatherButton;
-    FrameLayout FrameLayoutAddEntry;
-    FrameLayout FrameLayoutViewWeather;
-    WeatherMainFragment mWeatherMainFragment;
-    RecyclerView mRecyclerViewImages;
-    RecyclerView mRecyclerViewVideos;
-    FrameLayout mFrameLayoutMap;
-    ImageButton CloseButtonMap;
-    ViewEntryImagesAdapter mViewEntryImagesAdapter;
-    ViewEntryVideosAdapter mViewEntryVideosAdapter;
-    boolean hasFirstImage;
     String mCurrentPhotoPath;
-    String firstImage;
-    MapFragment mapFragment;
+    String mCurrentVideoPath;
+    private Context mContext;
+    private TextView CurrentDayTextView;
+    private TextView CurrentDateTextView;
+    private EditText editTextAddEntry;
+    private EditText editTitleAddEntry;
+    private ImageButton AddImagefromCameraButton;
+    private ImageButton AddVideofromCameraButton;
+    private ImageButton GeotagButton;
+    private ImageButton WeatherButton;
+    private FrameLayout mFrameLayoutWeatherFragmentContainer;
+    private FrameLayout mFrameLayoutLocationFragmentContainer;
+    private FrameLayout mFrameLayoutViewWeather;
+    private WeatherMainFragment mWeatherMainFragment;
+    private RecyclerView mRecyclerViewImages;
+    private RecyclerView mRecyclerViewVideos;
+    private FrameLayout mFrameLayoutMap;
+    private ViewEntryImagesAdapter mViewEntryImagesAdapter;
+    private ViewEntryVideosAdapter mViewEntryVideosAdapter;
+    private MapFragment mapFragment;
 
-    PersistableBundle mBundleViewProperties;
+    private Bundle mBundleViewProperties;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,26 +111,25 @@ public class ViewActivity extends AppCompatActivity {
         editTextAddEntry = (EditText) findViewById(R.id.editText);
         editTitleAddEntry = (EditText) findViewById(R.id.TitleEditText);
 
-//        Slide slide = new Slide(Gravity.BOTTOM);
-//        slide.addTarget(R.id.editText);
-//        slide.setInterpolator(AnimationUtils.loadInterpolator(this, android.R.interpolator.linear_out_slow_in));
-//        slide.setDuration(300);
-//        getWindow().setEnterTransition(slide);
-
         AddImagefromCameraButton = (ImageButton) findViewById(R.id.add_image_from_camera);
+        AddVideofromCameraButton = (ImageButton) findViewById(R.id.add_video_from_camera);
+
+
+        //Location Component
+        mFrameLayoutLocationFragmentContainer = (FrameLayout) findViewById(R.id.frame_layout_view_location_container);
         GeotagButton = (ImageButton) findViewById(R.id.switch_geo_location_button);
-        WeatherButton = (ImageButton) findViewById(R.id.view_weather_data);
-        FrameLayoutAddEntry = (FrameLayout) findViewById(R.id.frame_layout_add_entry);
-        FrameLayoutViewWeather = (FrameLayout) findViewById(R.id.frame_layout_view_weather_data);
-        FrameLayoutViewWeather.setVisibility(View.GONE);
-        mWeatherMainFragment = new WeatherMainFragment();
+        mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.fragment_map_location);
+        mFrameLayoutMap = (FrameLayout) findViewById(R.id.frame_layout_view_location_map);
+
 
         mRecyclerViewImages = (RecyclerView) findViewById(R.id.add_entry_images_recycler_view);
         mRecyclerViewImages.setVisibility(View.GONE);
         mViewEntryImagesAdapter = new ViewEntryImagesAdapter(mContext);
         mRecyclerViewImages.setAdapter(mViewEntryImagesAdapter);
-        LinearLayoutManager manager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
-        mRecyclerViewImages.setLayoutManager(manager);
+//        StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(3,1);
+//        mRecyclerViewImages.setLayoutManager(manager);
+////        LinearLayoutManager manager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
+////        mRecyclerViewImages.setLayoutManager(manager);
 
         mRecyclerViewVideos = (RecyclerView) findViewById(R.id.add_entry_videos_recycler_view);
         mRecyclerViewVideos.setVisibility(View.GONE);
@@ -140,16 +137,16 @@ public class ViewActivity extends AppCompatActivity {
         mRecyclerViewVideos.setAdapter(mViewEntryVideosAdapter);
         LinearLayoutManager manager1 = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
         mRecyclerViewVideos.setLayoutManager(manager1);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mBundleViewProperties = new PersistableBundle();
-        }
 
 
-        mFrameLayoutMap = (FrameLayout) findViewById(R.id.frame_layout_view_location_map);
-        mFrameLayoutMap.setVisibility(View.GONE);
+        mBundleViewProperties = new Bundle();
 
-        mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.fragment_map_location);
-        CloseButtonMap = (ImageButton) findViewById(R.id.close_map);
+
+        //Weather Component
+        WeatherButton = (ImageButton) findViewById(R.id.view_weather_data);
+        mFrameLayoutWeatherFragmentContainer = (FrameLayout) findViewById(R.id.frame_layout_view_weather_container);
+        mFrameLayoutViewWeather = (FrameLayout) findViewById(R.id.frame_layout_view_weather_data);
+
 
         Intent intent = getIntent();
         _ID = intent.getIntExtra("ID", -1);
@@ -161,7 +158,6 @@ public class ViewActivity extends AppCompatActivity {
         editTextAddEntry.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
 
             @Override
@@ -171,11 +167,10 @@ public class ViewActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-
             }
         });
 
-        //For Geotag Button
+        //Geotag Map Async Task
         new AsyncTask<Integer, Void, Integer>() {
             @Override
             protected Integer doInBackground(Integer... params) {
@@ -195,62 +190,67 @@ public class ViewActivity extends AppCompatActivity {
 
             @Override
             protected void onPostExecute(Integer integer) {
+//                super.onPostExecute(integer);
                 if (integer == -1) {
                     GeotagButton.setVisibility(View.GONE);
                 } else {
+                    DisplayMetrics metrics = new DisplayMetrics();
+                    getWindowManager().getDefaultDisplay().getMetrics(metrics);
+                    int height = metrics.heightPixels;
+                    int width = metrics.widthPixels;
+                    FrameLayout.LayoutParams mLayoutParams = new FrameLayout.LayoutParams(width * 4 / 6, height * 5 / 8, 4);
+                    mLayoutParams.setMargins(width / 6, height / 8, 0, 0);
+                    mFrameLayoutMap.setLayoutParams(mLayoutParams);
                     GeotagButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            DisplayMetrics metrics = new DisplayMetrics();
-                            getWindowManager().getDefaultDisplay().getMetrics(metrics);
-                            int height = metrics.heightPixels;
-                            int width = metrics.widthPixels;
-
-                            FrameLayout.LayoutParams mLayoutParams = new FrameLayout.LayoutParams(width * 4 / 6, height * 5 / 8, 4);
-                            mLayoutParams.setMargins(width / 6, height / 8, 0, 0);
-                            mFrameLayoutMap.setLayoutParams(mLayoutParams);
-                            mFrameLayoutMap.setVisibility(View.VISIBLE);
-
                             Cursor mCursor = getContentResolver().query(JournalContentProvider.LocationContentProviderCreator.LOCATION,
                                     null,
                                     "_id_main=?",
                                     new String[]{String.valueOf(_ID)},
                                     null);
-                            assert mCursor != null;
-                            mCursor.moveToFirst();
-                            final double latitude = mCursor.getFloat(Utils.LATITUDE_INDEX);
-                            final double longitude = mCursor.getFloat(Utils.LONGITUDE_INDEX);
-                            mCursor.close();
-                            mapFragment.getMapAsync(new OnMapReadyCallback() {
-                                @Override
-                                public void onMapReady(GoogleMap googleMap) {
-                                    LatLng mLatLng = new LatLng(latitude, longitude);
-                                    CameraPosition position = CameraPosition.builder()
-                                            .target(mLatLng)
-                                            .zoom(14)
-                                            .tilt(30)
-                                            .build();
-                                    googleMap.addMarker(new MarkerOptions().position(mLatLng));
-                                    googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 500, null);
-                                }
-                            });
+                            if (mCursor != null && mCursor.moveToFirst()) {
+                                final double latitude = mCursor.getFloat(Utils.LATITUDE_INDEX);
+                                final double longitude = mCursor.getFloat(Utils.LONGITUDE_INDEX);
+                                mCursor.close();
+                                mFrameLayoutLocationFragmentContainer.setVisibility(VISIBLE);
+                                mapFragment.getMapAsync(new OnMapReadyCallback() {
+                                    @Override
+                                    public void onMapReady(GoogleMap googleMap) {
+                                        LatLng mLatLng = new LatLng(latitude, longitude);
+                                        CameraPosition position = CameraPosition.builder()
+                                                .target(mLatLng)
+                                                .zoom(14)
+                                                .tilt(30)
+                                                .build();
+                                        googleMap.addMarker(new MarkerOptions().position(mLatLng));
+                                        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 500, null);
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                    mFrameLayoutLocationFragmentContainer.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (mFrameLayoutLocationFragmentContainer.getVisibility() == VISIBLE) {
+                                getFragmentManager().beginTransaction()
+                                        .remove(mapFragment)
+                                        .commit();
+                                mFrameLayoutLocationFragmentContainer.setVisibility(GONE);
+                            }
                         }
                     });
                 }
-                super.onPostExecute(integer);
             }
         }.execute(_ID);
 
-        //Set the Frame Layout to center of the Screen
-        DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
-        int top = (int) ((displayMetrics.heightPixels / displayMetrics.density) / 10);
-        int sides = (int) ((displayMetrics.widthPixels / displayMetrics.density) / 10);
-        int bottom = (int) ((displayMetrics.heightPixels / displayMetrics.density) / 5);
-        FrameLayout.LayoutParams tempParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        tempParams.setMargins(sides, top, sides, bottom);
-        FrameLayoutViewWeather.setLayoutParams(tempParams);
 
-        new AsyncTask<Integer, Void, Cursor>() {
+        //Weather Functionality Async Task
+        new AsyncTask<Integer, Void, Cursor>()
+
+        {
             @Override
             protected Cursor doInBackground(Integer... params) {
                 int recordedWeather = -1;
@@ -286,6 +286,16 @@ public class ViewActivity extends AppCompatActivity {
             protected void onPostExecute(Cursor cursor) {
                 super.onPostExecute(cursor);
 
+                mWeatherMainFragment = new WeatherMainFragment();
+                //Set the Weather Frame Layout to center of the Screen
+                DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+                int top = (int) ((displayMetrics.heightPixels / displayMetrics.density) / 10);
+                int sides = (int) ((displayMetrics.widthPixels / displayMetrics.density) / 10);
+                int bottom = (int) ((displayMetrics.heightPixels / displayMetrics.density) / 5);
+                FrameLayout.LayoutParams tempParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                tempParams.setMargins(sides, top, sides, bottom);
+                mFrameLayoutViewWeather.setLayoutParams(tempParams);
+
                 if (cursor != null) {
                     cursor.moveToFirst();
                     final Bundle weatherBundle = new Bundle();
@@ -299,58 +309,102 @@ public class ViewActivity extends AppCompatActivity {
                     weatherBundle.putString(Utils.MAIN_TEMP_MAX_WEATHER, cursor.getString(Utils.MAIN_TEMP_MAX_INDEX));
                     weatherBundle.putString(Utils.CLOUDS_WEATHER, cursor.getString(Utils.CLOUDS_INDEX));
                     weatherBundle.putString(Utils.NAME_WEATHER, cursor.getString(Utils.NAME_INDEX));
+                    Log.e(LOG_TAG + "hg", weatherBundle.toString());
 
                     WeatherButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if (!mWeatherMainFragment.isVisible()) {
+                            Log.e(LOG_TAG, "Invoked");
+                            if (mFrameLayoutWeatherFragmentContainer.getVisibility() == View.GONE && !mWeatherMainFragment.isAdded()) {
                                 mWeatherMainFragment.setArguments(weatherBundle);
-                                FrameLayoutViewWeather.setVisibility(View.VISIBLE);
+                                mFrameLayoutWeatherFragmentContainer.setVisibility(VISIBLE);
                                 getFragmentManager().beginTransaction()
                                         .add(R.id.frame_layout_view_weather_data, mWeatherMainFragment)
                                         .commit();
-                            } else {
-                                FrameLayoutViewWeather.setVisibility(GONE);
-                                getFragmentManager().beginTransaction()
-                                        .remove(mWeatherMainFragment)
-                                        .commit();
-
                             }
                         }
 
                     });
-                    FrameLayoutAddEntry.setOnClickListener(new View.OnClickListener() {
+                    mFrameLayoutWeatherFragmentContainer.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if (mWeatherMainFragment.isVisible()) {
-                                FrameLayoutViewWeather.setVisibility(GONE);
+                            if (mWeatherMainFragment.isAdded() && mFrameLayoutWeatherFragmentContainer.getVisibility() == VISIBLE) {
+                                mFrameLayoutWeatherFragmentContainer.setVisibility(GONE);
                                 getFragmentManager().beginTransaction()
                                         .remove(mWeatherMainFragment)
                                         .commit();
                             }
-                            if (mFrameLayoutMap.getVisibility() == VISIBLE) {
-                                mFrameLayoutMap.setVisibility(View.GONE);
-                            }
                         }
                     });
-                }
+                } else
+                    WeatherButton.setEnabled(false);
             }
         }.execute(_ID);
-
-
-        CloseButtonMap.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mFrameLayoutMap.setVisibility(View.GONE);
-            }
-        });
 
         AddImagefromCameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mRecyclerViewImages.getVisibility() != View.VISIBLE)
                     mRecyclerViewImages.setVisibility(View.VISIBLE);
-                dispatchTakePictureIntent();
+                Intent takeMediaIntent = null;
+                takeMediaIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                FileCreator creator = new FileCreator(mContext);
+                File photoFile = null;
+                Uri photoURI = null;
+                if (takeMediaIntent.resolveActivity(getPackageManager()) != null) {
+                    try {
+                        photoFile = creator.createImageFile();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                        Toast.makeText(mContext, "Some Error Occoured.", Toast.LENGTH_SHORT).show();
+                    }
+                    // Continue only if the File was successfully created
+                    if (photoFile != null) {
+                        try {
+                            photoURI = FileProvider.getUriForFile(mContext, "com.anuj.simplicity.myday.fileprovider", photoFile);
+                        } catch (IllegalArgumentException e) {
+                            Log.e(LOG_TAG, "File Outside Path Provided Error");
+                            e.printStackTrace();
+                        }
+                        if (photoURI != null) {
+                            mCurrentPhotoPath = photoFile.getAbsolutePath();
+                            takeMediaIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                            startActivityForResult(takeMediaIntent, REQUEST_TAKE_PHOTO);
+                        }
+                    }
+                }
+            }
+        });
+
+        AddVideofromCameraButton.setOnClickListener(new View.OnClickListener()
+
+        {
+            @Override
+            public void onClick(View v) {
+                if (mRecyclerViewVideos.getVisibility() != View.VISIBLE)
+                    mRecyclerViewVideos.setVisibility(View.VISIBLE);
+                FileCreator creator = new FileCreator(mContext);
+                Intent takeMediaIntent = null;
+                takeMediaIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+                File videoFile = null;
+                Uri videoURI = null;
+                if (takeMediaIntent.resolveActivity(getPackageManager()) != null) {
+                    videoFile = creator.createVideoFile();
+                    // Continue only if the File was successfully created
+                    if (videoFile != null) {
+                        try {
+                            videoURI = FileProvider.getUriForFile(mContext, "com.anuj.simplicity.myday.fileprovider", videoFile);
+                        } catch (IllegalArgumentException e) {
+                            Log.e(LOG_TAG, "File Outside Path Provided Error");
+                            e.printStackTrace();
+                        }
+                        if (videoURI != null) {
+                            mCurrentVideoPath = videoFile.getAbsolutePath();
+                            takeMediaIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoURI);
+                            startActivityForResult(takeMediaIntent, REQUEST_TAKE_VIDEO);
+                        }
+                    }
+                }
             }
         });
 
@@ -359,7 +413,9 @@ public class ViewActivity extends AppCompatActivity {
         PopulateVideos mPopulateVideos = new PopulateVideos();
 
         getSupportLoaderManager().initLoader(LOADER_ID_FOR_IMAGE_DETAILS, null, mPopulateImages);
+
         getSupportLoaderManager().initLoader(LOADER_ID_FOR_ENTRY_DETAILS, null, mPopulateEntry);
+
         getSupportLoaderManager().initLoader(LOADER_ID_FOR_VIDEO_DETAILS, null, mPopulateVideos);
 
         //Going to update entry into database now
@@ -367,31 +423,29 @@ public class ViewActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (textChanged)
-                    updateEntry();
+                onBackPressed();
             }
         });
     }
 
-
     @Override
     public void onBackPressed() {
-        //TODO Error resolution in this Part
-        Log.e(LOG_TAG, "Invoked");
-        if (textChanged) {
-            updateEntry();
-            super.onBackPressed();
-        } else if (mWeatherMainFragment.isVisible() || mWeatherMainFragment.isAdded()) {
+        if (mFrameLayoutWeatherFragmentContainer.getVisibility() == VISIBLE && mWeatherMainFragment.isAdded()) {
             Log.e(LOG_TAG, "Weather");
-            FrameLayoutViewWeather.setVisibility(GONE);
+            mFrameLayoutWeatherFragmentContainer.setVisibility(GONE);
             getFragmentManager().beginTransaction()
                     .remove(mWeatherMainFragment)
                     .commit();
-        } else if (mapFragment.isVisible() || mapFragment.isAdded()) {
+        } else if (mFrameLayoutLocationFragmentContainer.getVisibility() == VISIBLE) {
             Log.e(LOG_TAG, "Map");
-            mFrameLayoutMap.setVisibility(View.GONE);
+            mFrameLayoutLocationFragmentContainer.setVisibility(View.GONE);
+            getFragmentManager().beginTransaction()
+                    .remove(mapFragment)
+                    .commit();
         } else {
-            Log.e(LOG_TAG, "Back");
+            if (textChanged)
+                updateEntry();
+            supportFinishAfterTransition();
             super.onBackPressed();
         }
     }
@@ -410,8 +464,6 @@ public class ViewActivity extends AppCompatActivity {
                 mContentValues.put(Utils.TIME_MODIFIED_JOURNAL, time);
                 mContentValues.put(Utils.TITLE_JOURNAL, TITLE);
                 mContentValues.put(Utils.ENTRY_JOURNAL, ENTRY);
-                if (hasFirstImage)
-                    mContentValues.put(Utils.THUMB_PATH_JOURNAL, firstImage);
 
                 getContentResolver().update(JournalContentProvider.ContentProviderCreator.JOURNAL,
                         mContentValues,
@@ -420,37 +472,7 @@ public class ViewActivity extends AppCompatActivity {
                 return null;
             }
         }.execute();
-
-    }
-
-    private void dispatchTakePictureIntent() {
-
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        // Create the File where the photo should go
-        File photoFile = null;
-        Uri photoURI = null;
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-
-                try {
-                    photoURI = getUriForFile(this, "com.anuj.simplicity.myday.fileprovider", photoFile);
-                } catch (IllegalArgumentException e) {
-                    Log.e(LOG_TAG, "File Outside Path Provided Error");
-                    e.printStackTrace();
-                }
-                if (photoURI != null) {
-                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-                }
-            }
-        }
+        return;
     }
 
     @Override
@@ -487,52 +509,49 @@ public class ViewActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "MYDAY_" + timeStamp + "_";
-        File image = null;
-        File storageDir = null;
-        try {
-            SharedPreferences preferences = getSharedPreferences("com.simplicity.anuj.myday.FileDirectory", 0);
-            String defaultFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath();
-            String path = preferences.getString("file_dir_image", defaultFolder);
-            storageDir = new File(path);
-            image = File.createTempFile(
-                    imageFileName,  /* prefix */
-                    ".jpg",         /* suffix */
-                    storageDir      /* directory */
-            );
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Unable to create File");
-            e.printStackTrace();
-        } catch (SecurityException s) {
-            Log.e(LOG_TAG, "Unable to create File due to missing Permissions");
-            s.printStackTrace();
-        }
-        // Save a file: path for use with ACTION_VIEW intents
-        if (image != null) {
-            if (!hasFirstImage) {
-                firstImage = image.getAbsolutePath();
-                hasFirstImage = true;
-            }
-            mCurrentPhotoPath = image.getAbsolutePath();
-            return image;
-        }
-        return null;
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        //IMAGE
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            ContentValues mMediaContentValues = new ContentValues();
-            mMediaContentValues.put(Utils._ID_MAIN_MULTIMEDIA, _ID);
-            mMediaContentValues.put(Utils.IMAGE_PATH_MULTIMEDIA, mCurrentPhotoPath);
-            getContentResolver().insert(JournalContentProvider.MultimediaContentProviderCreator.MULTIMEDIA, mMediaContentValues);
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    ContentValues mMediaContentValues = new ContentValues();
+                    mMediaContentValues.put(Utils._ID_MAIN_IMAGE, _ID);
+                    mMediaContentValues.put(Utils.IMAGE_PATH, mCurrentPhotoPath);
+                    getContentResolver().insert(JournalContentProvider.ImageContentProviderCreator.IMAGE, mMediaContentValues);
+                    return null;
+                }
+            }.execute();
+            mRecyclerViewImages.getLayoutManager().onItemsChanged(mRecyclerViewImages);
             mViewEntryImagesAdapter.notifyDataSetChanged();
-
+            Log.e(LOG_TAG, "ADDED TO mImageArray" + mCurrentPhotoPath);
+        } else if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_CANCELED) {
+            File mVideoFile = new File(mCurrentPhotoPath);
+            mVideoFile.delete();
         }
+
+        //VIDEO
+        if (requestCode == REQUEST_TAKE_VIDEO && resultCode == RESULT_OK) {
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    ContentValues mMediaContentValues = new ContentValues();
+                    mMediaContentValues.put(Utils._ID_MAIN_VIDEO, _ID);
+                    mMediaContentValues.put(Utils.VIDEO_PATH, mCurrentVideoPath);
+                    getContentResolver().insert(JournalContentProvider.VideoContentProviderCreator.VIDEO, mMediaContentValues);
+                    return null;
+                }
+            }.execute();
+            mViewEntryVideosAdapter.notifyDataSetChanged();
+            Log.e(LOG_TAG, "Added to mVideoArray" + mCurrentVideoPath);
+        } else if (requestCode == REQUEST_TAKE_VIDEO && resultCode == RESULT_CANCELED) {
+            File mVideoFile = new File(mCurrentVideoPath);
+            mVideoFile.delete();
+        }
+
     }
 
     private class PopulateEntry implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -599,14 +618,13 @@ public class ViewActivity extends AppCompatActivity {
     }
 
     private class PopulateImages implements LoaderManager.LoaderCallbacks<Cursor> {
-
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             Log.e(LOG_TAG, String.valueOf(_ID));
             return new CursorLoader(
                     mContext,
-                    JournalContentProvider.MultimediaContentProviderCreator.MULTIMEDIA,
-                    new String[]{Utils._ID_JOURNAL, Utils._ID_MAIN_MULTIMEDIA, Utils.IMAGE_PATH_MULTIMEDIA},
+                    JournalContentProvider.ImageContentProviderCreator.IMAGE,
+                    null,
                     "_id_main= ?",
                     new String[]{String.valueOf(_ID)},
                     null
@@ -615,15 +633,24 @@ public class ViewActivity extends AppCompatActivity {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-            Log.e("LOG", "onLoadFinished Invoked");
-            if (cursor.getCount() != 0) {
-                Log.e(LOG_TAG, "COUNT IMAGES " + cursor.getCount());
+//            Log.e("LOG", "onLoadFinished Invoked");
+            if (cursor.getCount() != 0 && cursor.moveToFirst()) {
+                int count = cursor.getCount();
+                if (count % 3 == 0) {
+                    StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
+                    manager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
+                    mRecyclerViewImages.setLayoutManager(manager);
+                } else if ((count % 2 == 0)) {
+                    StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+                    manager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
+                    mRecyclerViewImages.setLayoutManager(manager);
+                } else {
+                    LinearLayoutManager manager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
+                    mRecyclerViewImages.setLayoutManager(manager);
+                }
+//                Log.e(LOG_TAG, "COUNT IMAGES " + cursor.getCount());
                 mRecyclerViewImages.setVisibility(View.VISIBLE);
-                cursor.moveToFirst();
                 mViewEntryImagesAdapter.swapCursor(cursor);
-            } else {
-                Log.e(LOG_TAG, "Cursor of images was returned empty");
-                hasFirstImage = false;
             }
         }
 
@@ -641,8 +668,8 @@ public class ViewActivity extends AppCompatActivity {
             Log.e(LOG_TAG, String.valueOf(_ID));
             return new CursorLoader(
                     mContext,
-                    JournalContentProvider.MultimediaContentProviderCreator.MULTIMEDIA,
-                    new String[]{Utils._ID_JOURNAL, Utils._ID_MAIN_MULTIMEDIA, Utils.VIDEO_PATH_MULTIMEDIA},
+                    JournalContentProvider.VideoContentProviderCreator.VIDEO,
+                    null,
                     "_id_main= ?",
                     new String[]{String.valueOf(_ID)},
                     null
@@ -652,15 +679,11 @@ public class ViewActivity extends AppCompatActivity {
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
             if (cursor.getCount() != 0) {
-                Log.e(LOG_TAG, "COUNT VIDEOS " + cursor.getCount());
-                mRecyclerViewImages.setVisibility(View.VISIBLE);
+//                Log.e(LOG_TAG, "COUNT VIDEOS " + cursor.getCount());
+                mRecyclerViewVideos.setVisibility(View.VISIBLE);
                 cursor.moveToFirst();
                 mViewEntryVideosAdapter.swapCursor(cursor);
-            } else {
-                Log.e(LOG_TAG, "Cursor of videos was returned empty");
-                hasFirstImage = false;
             }
-
         }
 
         @Override
@@ -669,4 +692,5 @@ public class ViewActivity extends AppCompatActivity {
             loader.reset();
         }
     }
+
 }

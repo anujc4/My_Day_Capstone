@@ -2,15 +2,18 @@ package com.simplicity.anuj.myday.Adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.simplicity.anuj.myday.R;
@@ -56,6 +59,29 @@ public class CameraVideoAdapter extends RecyclerView.Adapter<CameraVideoAdapter.
                 intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 intent.setDataAndType(photoURI, "video/*");
                 context.startActivity(intent);
+            }
+        });
+        holder.mImageView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                //TODO Implement Delete Function Here
+                new AlertDialog.Builder(context)
+                        .setTitle("Delete Video")
+                        .setMessage("Are you sure you want to Delete this Video?")
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Toast.makeText(context, "Currently Deleting Videos is supported from View Entry Only.", Toast.LENGTH_LONG).show();
+                            }
+                        })
+                        .show();
+                return false;
             }
         });
     }

@@ -14,5 +14,8 @@ Refer to App Widget Documentation for margin information
 http://developer.android.com/guide/topics/appwidgets/index.html#CreatingLayout
     -->
     <dimen name="widget_margin">8dp</dimen>
-    <dimen name="app_bar_height">250dp</dimen>
+    <dimen name="app_bar_height">280dp</dimen>
+    <dimen name="card_view_padding">16dp</dimen>
+    <dimen name="tabsHeight">48dp</dimen>
+    <dimen name="navdrawer_profile_image_size">40dp</dimen>
 </resources>

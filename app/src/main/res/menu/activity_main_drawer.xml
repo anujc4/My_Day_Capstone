@@ -25,6 +25,11 @@
     <item android:title="About">
         <menu>
             <item
+                android:id="@+id/nav_review"
+                android:icon="@drawable/ic_rate_review_black_24dp"
+                android:title="Review on Play Store" />
+
+            <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_share_black_24dp"
                 android:title="Share" />

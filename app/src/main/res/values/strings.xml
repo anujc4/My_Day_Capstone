@@ -122,10 +122,13 @@
     <string name="no_delete">No</string>
     <string name="loading">Please Wait…</string>
     <string name="top_image">Top Image</string>
-    <string name="it_will_be_easier_for_my_day_to_know_you_if_you_sign_in_its_easy_and_takes_just_seconds">It will be easier for My Day to get to know you if you Sign In. It\'s easy and takes just seconds.</string>
+    <string name="sign_out_message">It will be easier for My Day to get to know you if you Sign In. It\'s easy and takes just seconds.</string>
     <string name="empty_message">Seems that you have no Entries yet. Press Add Button to make some new Memories.</string>
     <string name="sign_out">Sign Out</string>
     <string name="empty_string">Nothing to show.</string>
     <string name="beta_version">Beta Version</string>
     <string name="myday">MyDay</string>
+    <string name="journal_entry">Journal Entry</string>
+    <string name="your_activity">Your Activity</string>
+    <string name="transition_string">shared_elements_transition</string>
 </resources>

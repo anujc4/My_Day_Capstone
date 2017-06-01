@@ -33,7 +33,7 @@
             android:gravity="center"
             android:layout_below="@+id/google_logo_image_view"
             android:id="@+id/message_to_show_sign_in"
-            android:text="@string/it_will_be_easier_for_my_day_to_know_you_if_you_sign_in_its_easy_and_takes_just_seconds" />
+            android:text="@string/sign_out_message" />
     </RelativeLayout>
 
     <RelativeLayout

@@ -12,8 +12,12 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
 
-    <uses-feature android:name="android.hardware.CAMERA" />
-    <uses-feature android:name="android.hardware.location.gps" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
     <!--<uses-feature-->
     <!--android:glEsVersion="0x00020000"-->
     <!--android:required="true" />-->
@@ -60,8 +64,17 @@
             android:parentActivityName=".Activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustPan|stateHidden">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".Activity.MainActivity" />
+        </activity>
 
-            <!-- android:windowSoftInputMode="stateHidden" -->
+        <activity
+            android:name=".Activity.ViewActivity"
+            android:label="@string/title_activity_view_activity2"
+            android:parentActivityName=".Activity.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden|adjustPan">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activity.MainActivity" />
@@ -83,26 +96,6 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activity.MainActivity" />
-        </activity>
-        <activity
-            android:name=".Activity.ViewActivity"
-            android:label="@string/title_activity_view_activity2"
-            android:parentActivityName=".Activity.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.simplicity.anuj.myday.Activity.MainActivity" />
-        </activity>
-
-        <activity
-            android:name=".Activity.CameraActivity"
-            android:label="@string/title_activity_camera"
-            android:parentActivityName=".Activity.AddEntryActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.simplicity.anuj.myday.Activity.AddEntryActivity" />
         </activity>
 
         <activity

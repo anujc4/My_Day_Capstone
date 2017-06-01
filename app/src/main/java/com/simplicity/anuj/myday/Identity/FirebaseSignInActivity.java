@@ -3,6 +3,7 @@ package com.simplicity.anuj.myday.Identity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -84,6 +85,13 @@ public class FirebaseSignInActivity extends AppCompatActivity implements GoogleA
                     Toast.makeText(mContext, "Success.", Toast.LENGTH_SHORT).show();
                     mTextView.setText(user.getDisplayName() + ". You are Signed in using account " +
                             user.getEmail() + ". Tap Sign-Out to use a different account or revoke My Day's permission. This will disable some functionality.");
+                    SharedPreferences preferences = getSharedPreferences("com.simplicity.anuj.myday.Identity", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putBoolean("userSignedIn", true);
+                    editor.putString("photoUrl", String.valueOf(user.getPhotoUrl()));
+                    editor.putString("displayName", user.getDisplayName());
+                    editor.putString("email", user.getEmail());
+                    editor.apply();
                     Intent intent = new Intent();
                     setResult(RESULT_OK, intent);
 
@@ -109,7 +117,14 @@ public class FirebaseSignInActivity extends AppCompatActivity implements GoogleA
                         new ResultCallback<Status>() {
                             @Override
                             public void onResult(Status status) {
-                                mTextView.setText(R.string.it_will_be_easier_for_my_day_to_know_you_if_you_sign_in_its_easy_and_takes_just_seconds);
+                                SharedPreferences preferences = getSharedPreferences("com.simplicity.anuj.myday.Identity", MODE_PRIVATE);
+                                SharedPreferences.Editor editor = preferences.edit();
+                                editor.putBoolean("userSignedIn", true);
+                                editor.putString("photoUrl", null);
+                                editor.putString("displayName", null);
+                                editor.putString("email", null);
+                                editor.apply();
+                                mTextView.setText(R.string.sign_out_message);
                                 mSignInButton.setVisibility(View.VISIBLE);
                                 mSignOutButton.setVisibility(View.GONE);
                             }

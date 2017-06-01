@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.util.DisplayMetrics;
@@ -33,6 +34,7 @@ import java.io.File;
  */
 public class JournalAdapter extends RecyclerViewCursorAdapter<JournalAdapter.JournalAdapterViewHolder> {
     private static final String LOG_TAG = JournalAdapter.class.getCanonicalName();
+
     static int count = 0;
     private Context context;
     private ItemClickListener clickListener;
@@ -42,6 +44,11 @@ public class JournalAdapter extends RecyclerViewCursorAdapter<JournalAdapter.Jou
         this.context = context;
         setupCursorAdapter(null, 0, R.layout.card_view_item, false);
     }
+
+//    @Override
+//    public int getItemCount() {
+//        return count;
+//    }
 
     @Override
     public JournalAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -60,7 +67,8 @@ public class JournalAdapter extends RecyclerViewCursorAdapter<JournalAdapter.Jou
         this.clickListener = itemClickListener;
     }
 
-    class JournalAdapterViewHolder extends RecyclerViewCursorViewHolder implements View.OnClickListener {
+    class JournalAdapterViewHolder extends RecyclerViewCursorViewHolder
+            implements View.OnClickListener {
         final ImageView imageView;
         final TextView titleTextView;
         final TextView cardDescriptionTextView;
@@ -93,14 +101,14 @@ public class JournalAdapter extends RecyclerViewCursorAdapter<JournalAdapter.Jou
 
         @Override
         public void bindCursor(final Cursor cursor) {
-            itemView.setTag(cursor.getInt(Utils._ID_INDEX));
+            itemView.setTag(R.id._ID, cursor.getInt(Utils._ID_INDEX));
+            itemView.setTag(R.id.pos, getAdapterPosition());
+
             final int index = cursor.getInt(Utils._ID_INDEX);
             imageView.setImageResource(android.R.color.transparent);
             cardDeleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Log.d(LOG_TAG, "Delete Button Click Registered");
-
                     new AlertDialog.Builder(mContext)
                             .setTitle("Confirm Delete")
                             .setMessage("Are you sure you want to delete this entry? This action cannot be reverted.")
@@ -155,7 +163,7 @@ public class JournalAdapter extends RecyclerViewCursorAdapter<JournalAdapter.Jou
             });
 
             cardTimeStampTextView.setText(cursor.getString(Utils.DATE_CREATED_INDEX) + "  at " + cursor.getString(Utils.TIME_CREATED_INDEX));
-            titleTextView.setTextColor(mContext.getResources().getColor(R.color.Black));
+            titleTextView.setTextColor(mContext.getResources().getColor(R.color.primary_text));
             titleTextView.setText(cursor.getString(Utils.TITLE_INDEX));
             String description = cursor.getString(Utils.ENTRY_INDEX);
             if (description.length() > 200)
@@ -165,16 +173,61 @@ public class JournalAdapter extends RecyclerViewCursorAdapter<JournalAdapter.Jou
 
             DisplayMetrics metrics = new DisplayMetrics();
             ((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(metrics);
-            int width = metrics.widthPixels;
+            final int width = metrics.widthPixels;
 
-            if (!cursor.getString(Utils.THUMB_PATH_INDEX).equals("null")) {
-                titleTextView.setTextColor(mContext.getResources().getColor(R.color.White));
-                Glide.with(mContext)
-                        .load(new File(cursor.getString(Utils.THUMB_PATH_INDEX)))
-                        .centerCrop()
-                        .override(width, 400)
-                        .into(imageView);
-            }
+            //LOAD Image or Video File
+            new AsyncTask<Integer, Void, File>() {
+                @Override
+                protected File doInBackground(Integer... params) {
+                    int _ID = params[0];
+                    Cursor cursor_thumbnail = mContext.getContentResolver().query(
+                            JournalContentProvider.ImageContentProviderCreator.IMAGE,
+                            null,
+                            "_id_main = ?",
+                            new String[]{String.valueOf(_ID)},
+                            null
+                    );
+
+                    if (cursor_thumbnail != null && cursor_thumbnail.moveToFirst()) {
+                        File file = new File(cursor_thumbnail.getString(Utils.IMAGE_PATH_INDEX));
+                        cursor_thumbnail.close();
+                        return file;
+                    } else {
+                        cursor_thumbnail = mContext.getContentResolver().query(
+                                JournalContentProvider.VideoContentProviderCreator.VIDEO,
+                                null,
+                                "_id_main = ?",
+                                new String[]{String.valueOf(_ID)},
+                                null
+                        );
+                        if (cursor_thumbnail != null && cursor_thumbnail.moveToFirst()) {
+                            File file = new File(cursor_thumbnail.getString(Utils.VIDEO_PATH_INDEX));
+                            Log.e(LOG_TAG, file.getAbsolutePath());
+                            cursor_thumbnail.close();
+                            return file;
+                        } else {
+                            cursor_thumbnail.close();
+                        }
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(File file) {
+                    super.onPostExecute(file);
+                    if (file != null) {
+                        titleTextView.setTextColor(mContext.getResources().getColor(R.color.white));
+                        Glide.with(mContext)
+                                .load(file)
+                                .centerCrop()
+                                .override(width, 400)
+                                .error(R.drawable.error_placeholder)
+                                .placeholder(R.drawable.loading_placeholder)
+                                .into(imageView);
+
+                    }
+                }
+            }.execute(cursor.getInt(Utils._ID_INDEX));
         }
 
         @Override
