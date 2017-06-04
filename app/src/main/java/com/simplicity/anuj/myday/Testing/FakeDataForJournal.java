@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import com.simplicity.anuj.myday.Data.JournalContentProvider;
 import com.simplicity.anuj.myday.Utility.Utils;
 
+import java.sql.Timestamp;
 import java.util.Random;
 
 /**
@@ -40,7 +41,16 @@ public class FakeDataForJournal {
         insertFakeDatac();
     }
 
+    private Timestamp getFakeTimeStamp() {
+        long offset = Timestamp.valueOf("2016-07-01 00:00:00").getTime();
+        long end = Timestamp.valueOf("2017-06-01 00:00:00").getTime();
+        long diff = end - offset + 1;
+        Timestamp rand = new Timestamp(offset + (long) (Math.random() * diff));
+        return rand;
+    }
+
     private void insertFakeDatac() {
+
 
 
         new AsyncTask<Void, Void, Void>() {
@@ -79,12 +89,69 @@ public class FakeDataForJournal {
                 "6-July-2016",
                 "12-July-2016",
                 "12-July-2016",
-                "12-July-2016",
-                "21-August-2016",
-                "22-August-2016",
-                "23-August-2016",
-                "23-August-2016",
+                "13-July-2016",
+                "14-July-2016",
+                "15-July-2016",
+                "16-July-2016",
+                "17-July-2016",
+                "18-July-2016",
+                "19-July-2016",
+                "20-July-2016",
+                "21-July-2016",
+                "22-July-2016",
+                "23-July-2016",
+                "23-July-2016",
+                "23-July-2016",
+                "24-July-2016",
+                "24-July-2016",
+                "25-July-2016",
+                "26-July-2016",
+                "1-August-2016",
+                "2-August-2016",
+                "3-August-2016",
+                "4-August-2016",
+                "5-August-2016",
+                "5-August-2016",
+                "6-August-2016",
+                "6-August-2016",
+                "7-August-2016",
+                "8-August-2016",
+                "8-August-2016",
+                "8-August-2016",
+                "9-August-2016",
+                "10-August-2016",
+                "12-August-2016",
+                "12-August-2016",
+                "14-August-2016",
+                "15-August-2016",
+                "16-August-2016",
+                "16-August-2016",
+                "1-September-2016",
+                "1-September-2016",
+                "1-September-2016",
+                "2-September-2016",
+                "4-September-2016",
+                "5-September-2016",
+                "7-September-2016",
+                "8-September-2016",
+                "12-September-2016",
+                "12-September-2016",
+                "14-September-2016",
+                "15-September-2016",
+                "16-September-2016",
+                "20-September-2016",
+                "21-September-2016",
                 "22-September-2016",
+                "22-September-2016",
+                "22-September-2016",
+                "23-September-2016",
+                "23-September-2016",
+                "24-September-2016",
+                "25-September-2016",
+                "26-September-2016",
+                "27-September-2016",
+                "28-September-2016",
+                "29-September-2016",
                 "1-October-2016",
                 "2-October-2016",
                 "3-October-2016",

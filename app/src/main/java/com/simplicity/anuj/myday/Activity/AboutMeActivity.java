@@ -59,7 +59,6 @@ public class AboutMeActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     deleteDB();
-                                    ;
                                 }
                             })
                             .setNegativeButton("Fake Data", new DialogInterface.OnClickListener() {

@@ -1,6 +1,7 @@
 package com.simplicity.anuj.myday.Adapter;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,6 +23,8 @@ import android.widget.Toast;
 import com.androidessence.recyclerviewcursoradapter.RecyclerViewCursorAdapter;
 import com.androidessence.recyclerviewcursoradapter.RecyclerViewCursorViewHolder;
 import com.bumptech.glide.Glide;
+import com.like.LikeButton;
+import com.like.OnLikeListener;
 import com.simplicity.anuj.myday.Data.JournalContentProvider;
 import com.simplicity.anuj.myday.R;
 import com.simplicity.anuj.myday.Utility.ItemClickListener;
@@ -77,6 +80,7 @@ public class JournalAdapter extends RecyclerViewCursorAdapter<JournalAdapter.Jou
         final Button cardShareButton;
         final CardView mCardView;
         final FrameLayout mFrameLayout;
+        final LikeButton likeButton;
 
         JournalAdapterViewHolder(View itemView) {
             super(itemView);
@@ -88,6 +92,7 @@ public class JournalAdapter extends RecyclerViewCursorAdapter<JournalAdapter.Jou
             cardDeleteButton = (Button) itemView.findViewById(R.id.card_view_delete);
             mCardView = (CardView) itemView.findViewById(R.id.card_view);
             mFrameLayout = (FrameLayout) itemView.findViewById(R.id.frame_layout_main_activity);
+            likeButton = (LikeButton) itemView.findViewById(R.id.marked_favourite_entry);
 
             Typeface adlanta = Typeface.createFromAsset(mContext.getAssets(), "fonts/adlanta.ttf");
             Typeface adlanta_light = Typeface.createFromAsset(mContext.getAssets(), "fonts/adlanta_light.ttf");
@@ -105,6 +110,7 @@ public class JournalAdapter extends RecyclerViewCursorAdapter<JournalAdapter.Jou
             itemView.setTag(R.id.pos, getAdapterPosition());
 
             final int index = cursor.getInt(Utils._ID_INDEX);
+
             imageView.setImageResource(android.R.color.transparent);
             cardDeleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -140,10 +146,58 @@ public class JournalAdapter extends RecyclerViewCursorAdapter<JournalAdapter.Jou
                 }
             });
 
+            likeButton.setOnLikeListener(new OnLikeListener() {
+                ContentValues tempValues = new ContentValues();
+
+                @Override
+                public void liked(LikeButton likeButton) {
+                    tempValues.put(Utils.IS_MARKED, "1");
+                    new AsyncTask<Integer, Void, Void>() {
+                        @Override
+                        protected Void doInBackground(Integer... params) {
+                            int updated = mContext.getContentResolver().update(
+                                    JournalContentProvider.ContentProviderCreator.JOURNAL,
+                                    tempValues,
+                                    "_id = ?",
+                                    new String[]{String.valueOf(index)}
+                            );
+//                            Log.e(LOG_TAG ,updated + " entries Updated");
+                            return null;
+                        }
+                    }.execute(index);
+                    notifyItemChanged(getAdapterPosition());
+                }
+
+                @Override
+                public void unLiked(LikeButton likeButton) {
+                    tempValues.put(Utils.IS_MARKED, "-1");
+                    new AsyncTask<Integer, Void, Void>() {
+                        @Override
+                        protected Void doInBackground(Integer... params) {
+                            int updated = mContext.getContentResolver().update(
+                                    JournalContentProvider.ContentProviderCreator.JOURNAL,
+                                    tempValues,
+                                    "_id = ?",
+                                    new String[]{String.valueOf(index)}
+                            );
+
+//                            Log.e(LOG_TAG ,updated + " entries Updated");
+                            return null;
+                        }
+                    }.execute(index);
+                    notifyItemChanged(getAdapterPosition());
+                }
+            });
+
             final String title = cursor.getString(Utils.TITLE_INDEX);
             final String entry = cursor.getString(Utils.ENTRY_INDEX);
             final String date_created = cursor.getString(Utils.DATE_CREATED_INDEX);
             final String time_created = cursor.getString(Utils.TIME_CREATED_INDEX);
+            final int isMarked = cursor.getInt(Utils.IS_MARKED_INDEX);
+            if (isMarked == 1)
+                likeButton.setLiked(true);
+            else
+                likeButton.setLiked(false);
 
             cardShareButton.setOnClickListener(new View.OnClickListener() {
                 @Override

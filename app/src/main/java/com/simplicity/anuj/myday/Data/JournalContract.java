@@ -46,4 +46,9 @@ public interface JournalContract {
     @NotNull
     @DefaultValue("-1")
     String HAS_WEATHER = "has_weather";
+
+    @DataType(DataType.Type.INTEGER)
+    @NotNull
+    @DefaultValue("-1")
+    String IS_MARKED = "is_marked";
 }

@@ -54,6 +54,18 @@
                     android:textIsSelectable="false"
                     android:textSize="20sp"
                     android:textStyle="bold" />
+
+                <com.like.LikeButton
+                    android:id="@+id/marked_favourite_entry"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    card_view:icon_size="25dp"
+                    card_view:icon_type="star"
+                    android:layout_gravity="top|end"
+                    card_view:circle_start_color="@color/colorPrimary"
+                    card_view:dots_primary_color="@color/colorAccent"
+                    card_view:dots_secondary_color="@color/colorPrimary"
+                    card_view:anim_scale_factor="2" />
             </FrameLayout>
 
             <LinearLayout

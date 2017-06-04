@@ -15,6 +15,7 @@ public class Utils {
     public static final int TIME_STAMP_INDEX = 7;
     public static final int HAS_LOCAION_INDEX = 8;
     public static final int HAS_WEATHER_INDEX = 9;
+    public static final int IS_MARKED_INDEX = 10;
 
     public static final int _ID_IMAGE_INDEX = 0;
     public static final int _ID_MAIN_IMAGE_INDEX = 1;
@@ -54,6 +55,7 @@ public class Utils {
     public static final String TIME_STAMP_JOURNAL = "time_stamp";
     public static final String HAS_LOCATION_JOURNAL = "has_location";
     public static final String HAS_WEATHER_JOURNAL = "has_weather";
+    public static final String IS_MARKED = "is_marked";
 
     public static final String _ID_IMAGE = "_id";
     public static final String _ID_MAIN_IMAGE = "_id_main";

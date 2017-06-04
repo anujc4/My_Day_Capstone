@@ -72,11 +72,10 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:overScrollMode="never"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:context=".Activity.MainActivity" />
-
 
     <include layout="@layout/content_main" />
 
@@ -86,7 +85,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_add_entry"
-        app:layout_behavior="com.simplicity.anuj.myday.FAB" />
+        android:src="@drawable/ic_add_entry" />
 
 </android.support.design.widget.CoordinatorLayout>

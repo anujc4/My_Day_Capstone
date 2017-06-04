@@ -6,10 +6,10 @@
             android:id="@+id/nav_person"
             android:icon="@drawable/ic_person_black_24dp"
             android:title="Manage Account" />
-        <!--<item-->
-        <!--android:id="@+id/nav_gallery"-->
-        <!--android:icon="@drawable/ic_photo_library_black_24dp"-->
-        <!--android:title="Gallery" />-->
+        <item
+            android:id="@+id/nav_marked"
+            android:icon="@drawable/ic_star_black_24dp"
+            android:title="Bookmarks" />
 
         <item
             android:id="@+id/nav_calender"

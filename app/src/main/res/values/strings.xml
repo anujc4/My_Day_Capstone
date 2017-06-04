@@ -131,4 +131,23 @@
     <string name="journal_entry">Journal Entry</string>
     <string name="your_activity">Your Activity</string>
     <string name="transition_string">shared_elements_transition</string>
+    <string name="january">January</string>
+    <string name="february">February</string>
+    <string name="march">March</string>
+    <string name="april">April</string>
+    <string name="may">May</string>
+    <string name="june">June</string>
+    <string name="july">July</string>
+    <string name="august">August</string>
+    <string name="september">September</string>
+    <string name="october">October</string>
+    <string name="november">November</string>
+    <string name="december">December</string>
+    <string name="what_s_this">What\'s this?</string>
+    <string name="today">Date </string>
+    <string name="found">Found</string>
+    <string name="entries">entries.</string>
+    <string name="title_activity_marked">Bookmarks</string>
+    <string name="no_favourites_present">No Favourites Present</string>
+
 </resources>

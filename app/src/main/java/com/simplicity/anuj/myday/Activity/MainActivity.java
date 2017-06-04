@@ -8,28 +8,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.content.res.ResourcesCompat;
@@ -83,9 +75,9 @@ import static android.view.View.GONE;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, LoaderManager.LoaderCallbacks<Cursor>, ActivityCompat.OnRequestPermissionsResultCallback, ItemClickListener, OnChartDataLoadFinishedListener {
 
+    static final int PERMISSION_CODE = 100;
+    static final int REQUEST_AUTHENTICATION_CODE = 200;
     private static final int LOADER_ID = 1;
-    private static final int PERMISSION_CODE = 100;
-    private static final int REQUEST_AUTHENTICATION_CODE = 200;
     private static final int ENTRY_MADE = 201;
     private final String LOG_TAG = MainActivity.class.getSimpleName();
     private final String PermissionsList[] = {
@@ -115,7 +107,6 @@ public class MainActivity extends AppCompatActivity
     private ContentValues deletedRowJournal;
     private ContentValues deletedRowLocation;
     private ContentValues deletedRowWeather;
-    private Paint p = new Paint();
 
 
     @Override
@@ -140,13 +131,8 @@ public class MainActivity extends AppCompatActivity
                 .build()
         );
 
-        Thread AskPermissions = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ActivityCompat.requestPermissions((Activity) mContext, PermissionsList, PERMISSION_CODE);
-            }
-        });
-        AskPermissions.start();
+        //Ask Permissions
+        ActivityCompat.requestPermissions(this, PermissionsList, PERMISSION_CODE);
 
         Thread t = new Thread(new Runnable() {
             @Override
@@ -173,32 +159,6 @@ public class MainActivity extends AppCompatActivity
         //Obtain the FirebaseCrashReporting instance
         FirebaseCrash.report(new Exception("MyDay is now enabled Error Reporting."));
 
-
-        //Create App Directory
-        SharedPreferences checkDir = getSharedPreferences("com.simplicity.anuj.myday.FileDirectory", MODE_PRIVATE);
-        if (!checkDir.contains("file_dir_image") && !checkDir.contains("file_dir_video")) {
-            String MyDayFolder = Environment.getExternalStorageDirectory().toString();
-            File AppDirectory = new File(MyDayFolder + "/MyDay");
-            final String path = AppDirectory.getAbsolutePath();
-            try {
-                AppDirectory.mkdirs();
-            } catch (SecurityException e) {
-                e.printStackTrace();
-            } finally {
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        SharedPreferences fileDirPreferences = getSharedPreferences("com.simplicity.anuj.myday.FileDirectory", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = fileDirPreferences.edit();
-                        editor.putString("file_dir_image", path);
-                        editor.putString("file_dir_video", path);
-                        editor.commit();
-                        return null;
-                    }
-                }.execute();
-            }
-        }
-
         fab = (FloatingActionButton) findViewById(R.id.fab);
         lineChartView = (LineChartView) findViewById(R.id.line_chart);
         mCollapsingToobarScrimImageView = (ImageView) findViewById(R.id.collapsing_toolbar_scrim);
@@ -206,7 +166,6 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-//        mRecyclerView.setHasFixedSize(true);
         mJournalAdapter = new JournalAdapter(this);
         mJournalAdapter.setClickListener(this);
         mRecyclerView.setAdapter(mJournalAdapter);
@@ -224,7 +183,6 @@ public class MainActivity extends AppCompatActivity
         ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START | ItemTouchHelper.END | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public void onMoved(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, int fromPos, RecyclerView.ViewHolder target, int toPos, int x, int y) {
-                viewHolder.itemView.setAlpha(0.3f);
                 super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
             }
 
@@ -241,8 +199,6 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onSwiped(final RecyclerView.ViewHolder viewHolder, int direction) {
                 final Snackbar mSnackbar = Snackbar.make(parentLayout, "Entry Successfully Deleted.", Snackbar.LENGTH_LONG);
-//                final int p = (int) viewHolder.itemView.getTag(R.id.pos);
-
                 int _ID = (int) viewHolder.itemView.getTag(R.id._ID);
 
                 new AsyncTask<Integer, Void, Integer>() {
@@ -438,8 +394,10 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         Intent intent;
-
-        if (id == R.id.nav_calender) {
+        if (id == R.id.nav_marked) {
+            intent = new Intent(this, MarkedActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_calender) {
             intent = new Intent(this, CalenderActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_settings) {
@@ -507,25 +465,48 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_AUTHENTICATION_CODE) {
-            if (resultCode == RESULT_OK)
-                Toast.makeText(this, "Awesome! Now you can use all features of the My Day", Toast.LENGTH_SHORT).show();
-            else if (resultCode == RESULT_CANCELED)
-                Toast.makeText(this, "You have to Sign-in if you want to use all features of the Application", Toast.LENGTH_LONG).show();
-        }
-        if (requestCode == ENTRY_MADE) {
-            if (resultCode == RESULT_OK)
-                getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+        switch (requestCode) {
+            case REQUEST_AUTHENTICATION_CODE:
+                if (resultCode == RESULT_OK)
+                    Toast.makeText(this, "Awesome! Now you can use all features of the My Day", Toast.LENGTH_SHORT).show();
+                else if (resultCode == RESULT_CANCELED)
+                    Toast.makeText(this, "You have to Sign-in if you want to use all features of the Application", Toast.LENGTH_LONG).show();
+                break;
+
+            case ENTRY_MADE:
+                if (resultCode == RESULT_OK)
+                    getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+                break;
         }
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode != PERMISSION_CODE) {
-            Toast.makeText(this, "You have Denied Some Permissions. Please review from settings.", Toast.LENGTH_LONG).show();
-        }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_CODE) {
+            String MyDayFolder = Environment.getExternalStorageDirectory().toString();
+            File AppDirectory = new File(MyDayFolder + "/MyDay");
+            if (!AppDirectory.exists() && !AppDirectory.isDirectory()) {
+                final String path = AppDirectory.getAbsolutePath();
+                try {
+                    boolean success = AppDirectory.mkdirs();
+                    if (!success)
+                        Log.e(LOG_TAG, "Failed to create folder.");
+                    else {
+                        Log.e(LOG_TAG, "Created folder");
+                        SharedPreferences fileDirPreferences = getSharedPreferences("com.simplicity.anuj.myday.FileDirectory", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = fileDirPreferences.edit();
+                        editor.putString("file_dir_image", path);
+                        editor.putString("file_dir_video", path);
+                        editor.apply();
+                    }
+                } catch (SecurityException e) {
+                    Log.e(LOG_TAG, "Permission not granted yet..");
+                    ActivityCompat.requestPermissions((Activity) mContext, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE"}, PERMISSION_CODE);
+                    e.printStackTrace();
+                }
+            } else Log.e(LOG_TAG, "Already Exists");
+        }
     }
 
     //Chart Data is ready

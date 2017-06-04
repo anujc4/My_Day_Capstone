@@ -3,14 +3,12 @@ package com.simplicity.anuj.myday.Data;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import net.simonvt.schematic.annotation.Database;
 import net.simonvt.schematic.annotation.IfNotExists;
 import net.simonvt.schematic.annotation.OnCreate;
 import net.simonvt.schematic.annotation.OnUpgrade;
 import net.simonvt.schematic.annotation.Table;
-import net.simonvt.schematic.annotation.TableEndpoint;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -19,7 +17,7 @@ import static android.content.Context.MODE_PRIVATE;
  */
 @Database(version = JournalDatabaseCreator.VERSION)
 public class JournalDatabaseCreator {
-    static final int VERSION = 8;
+    static final int VERSION = 9;
     @Table(ImageContract.class)
     static final String IMAGE = "image";
     @Table(VideoContract.class)
